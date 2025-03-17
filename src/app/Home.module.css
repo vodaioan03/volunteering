@@ -1,0 +1,7 @@
+/* pages/Home.module.css */
+  
+  .content {
+    flex: 1; /* This makes the content area take up the remaining space */
+    min-height: calc(100vh - 7vh - 18vh); /* Ensure content is at least 100vh - header - footer */
+    background-color: aqua;
+  }

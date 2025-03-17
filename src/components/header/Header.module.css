@@ -1,0 +1,179 @@
+/*BACKGROUND COLOR: D1D1D6  */
+.header {
+  padding: 1%;
+  margin: 0% 0.05%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  align-content: center;
+  flex-wrap: wrap;
+  gap: 510px 100px;
+  background-color: #D1D1D6;
+  border-bottom: 1px solid #d9d9d9;
+  font-family:
+    Inter,
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1;
+  height: 5vh;
+  border-radius: 20px 20px 20px 20px / 20px 20px 20px 20px;
+}
+
+
+/*Left section*/
+
+.leftSection {
+  align-self: stretch;
+  display: flex;
+  min-width: 240px;
+  margin: auto 0;
+  align-items: center;
+  gap: 25px;
+  justify-content: left;
+  flex-wrap: wrap;
+  width: 14%;
+}
+.logo {
+  aspect-ratio: 1;
+  object-fit: contain;
+  object-position: center;
+  width: 38px;
+  align-self: stretch;
+  margin: auto 0;
+  flex-shrink: 0;
+}
+
+
+/*Middle section*/
+.navigation {
+  align-self: stretch;
+  display: flex;
+  min-width: 240px;
+  margin: auto 0;
+  align-items: center;
+  gap: 8px;
+  color: #1e1e1e;
+  white-space: nowrap;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 509px;
+}
+
+.navPill {
+  align-self: stretch;
+  border-radius: 8px;
+  margin: auto 0;
+  padding: 8px;
+  gap: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.navPill.active {
+  background-color: rgb(245, 245, 245);
+}
+
+.navPill:hover {
+  background-color: rgba(245, 245, 245, 0.8);
+}
+
+
+/*Right Section From NavBar*/
+.rightSection {
+  align-self: stretch;
+  display: flex;
+  min-width: 240px;
+  margin: auto 0;
+  align-items: center;
+  gap: 25px;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 14%;
+}
+
+.authButtons {
+  align-self: stretch;
+  display: flex;
+  margin: auto 0;
+  align-items: center;
+  gap: 12px;
+  justify-content: start;
+  flex-grow: 1;
+  flex-shrink: 1;
+  width: 50%;
+}
+
+.signInButton,
+.registerButton {
+  align-self: stretch;
+  border-radius: 8px;
+  margin: auto 0;
+  padding: 8px;
+  gap: 8px;
+  overflow: hidden;
+  flex: 1;
+  flex-shrink: 1;
+  flex-basis: 0%;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.signInButton {
+  background-color: rgb(227, 227, 227);
+  border: 1px solid rgb(118, 118, 118);
+  color: #1e1e1e;
+}
+
+.registerButton {
+  background-color: rgb(44, 44, 44);
+  border: 1px solid rgb(44, 44, 44);
+  color: #f5f5f5;
+  white-space: nowrap;
+}
+
+.signInButton:hover,
+.registerButton:hover {
+  opacity: 0.9;
+}
+
+.languageSelector {
+  aspect-ratio: 1.54;
+  object-fit: contain;
+  object-position: center;
+  width: 74px;
+  align-self: stretch;
+  margin: auto 0;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.rightButtons {
+  align-self: stretch;
+  display: flex;
+  margin: auto 0;
+  align-items: center;
+  gap: 12px;
+  justify-content: start;
+  flex-grow: 1;
+  flex-shrink: 1;
+  width: 5%;
+}
+
+@media (max-width: 991px) {
+  .navigation {
+    max-width: 100%;
+    white-space: initial;
+  }
+
+  .navPill {
+    white-space: initial;
+  }
+
+  .registerButton {
+    white-space: initial;
+  }
+}

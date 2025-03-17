@@ -1,0 +1,60 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  padding: 30px 24px 8px;
+  gap: 24px;
+  width: 228px;
+  background-color: #fff;
+}
+
+.profileSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.userName {
+  color: #000;
+  font-family: Roboto, sans-serif;
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 400;
+}
+
+.infoLabel {
+  padding: 8px;
+  border-radius: 8px;
+  color: #1e1e1e;
+  font-family: Inter, sans-serif;
+  font-size: 16px;
+  line-height: 16px;
+  font-weight: 400;
+  background-color: #aeaeb2;
+}
+
+.menuList {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.menuItem {
+  color: #000;
+  font-family: Roboto, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: 0.15px;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+@media (max-width: 991px) {
+  .sidebar {
+    width: 100%;
+  }
+}
