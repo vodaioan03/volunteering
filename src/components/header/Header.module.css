@@ -1,179 +1,143 @@
-/*BACKGROUND COLOR: D1D1D6  */
+/* Header */
 .header {
-  padding: 1%;
-  margin: 0% 0.05%;
+  padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  align-content: center;
-  flex-wrap: wrap;
-  gap: 510px 100px;
-  background-color: #D1D1D6;
-  border-bottom: 1px solid #d9d9d9;
-  font-family:
-    Inter,
-    -apple-system,
-    Roboto,
-    Helvetica,
-    sans-serif;
+  background: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+  backdrop-filter: blur(10px); /* Glassmorphism effect */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18); /* Subtle border */
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  font-family: Inter, -apple-system, Roboto, Helvetica, sans-serif;
   font-size: 16px;
   font-weight: 400;
   line-height: 1;
-  height: 5vh;
-  border-radius: 20px 20px 20px 20px / 20px 20px 20px 20px;
+  border-radius: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-
-/*Left section*/
-
+/* Left Section */
 .leftSection {
-  align-self: stretch;
   display: flex;
-  min-width: 240px;
-  margin: auto 0;
   align-items: center;
-  gap: 25px;
-  justify-content: left;
-  flex-wrap: wrap;
-  width: 14%;
+  gap: 1rem;
 }
+
 .logo {
-  aspect-ratio: 1;
-  object-fit: contain;
-  object-position: center;
   width: 38px;
-  align-self: stretch;
-  margin: auto 0;
-  flex-shrink: 0;
+  height: 38px;
+  object-fit: contain;
+  cursor: pointer;
+  transition: transform 0.3s ease;
 }
 
+.logo:hover {
+  transform: scale(1.1); /* Slight zoom on hover */
+}
 
-/*Middle section*/
+/* Navigation */
 .navigation {
-  align-self: stretch;
   display: flex;
-  min-width: 240px;
-  margin: auto 0;
   align-items: center;
-  gap: 8px;
-  color: #1e1e1e;
-  white-space: nowrap;
-  justify-content: center;
-  flex-wrap: wrap;
-  width: 509px;
+  gap: 1rem;
 }
 
 .navPill {
-  align-self: stretch;
-  border-radius: 8px;
-  margin: auto 0;
-  padding: 8px;
-  gap: 8px;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  color: #1e1e1e;
+  text-decoration: none;
+  transition: all 0.3s ease;
   cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.navPill.active {
-  background-color: rgb(245, 245, 245);
 }
 
 .navPill:hover {
-  background-color: rgba(245, 245, 245, 0.8);
+  background: rgba(245, 245, 245, 0.8); /* Light hover effect */
 }
 
+.navPill.active {
+  background: linear-gradient(45deg, #3b82f6, #6366f1); /* Gradient for active link */
+  color: #ffffff;
+}
 
-/*Right Section From NavBar*/
+/* Right Section */
 .rightSection {
-  align-self: stretch;
   display: flex;
-  min-width: 240px;
-  margin: auto 0;
   align-items: center;
-  gap: 25px;
-  justify-content: center;
-  flex-wrap: wrap;
-  width: 14%;
+  gap: 1.5rem;
 }
 
 .authButtons {
-  align-self: stretch;
   display: flex;
-  margin: auto 0;
   align-items: center;
-  gap: 12px;
-  justify-content: start;
-  flex-grow: 1;
-  flex-shrink: 1;
-  width: 50%;
+  gap: 1rem;
 }
 
 .signInButton,
 .registerButton {
-  align-self: stretch;
-  border-radius: 8px;
-  margin: auto 0;
-  padding: 8px;
-  gap: 8px;
-  overflow: hidden;
-  flex: 1;
-  flex-shrink: 1;
-  flex-basis: 0%;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .signInButton {
-  background-color: rgb(227, 227, 227);
-  border: 1px solid rgb(118, 118, 118);
+  background: rgba(227, 227, 227, 0.8); /* Semi-transparent background */
+  border: 1px solid rgba(118, 118, 118, 0.2);
   color: #1e1e1e;
 }
 
+.signInButton:hover {
+  background: rgba(227, 227, 227, 1); /* Solid background on hover */
+  transform: translateY(-2px);
+}
+
 .registerButton {
-  background-color: rgb(44, 44, 44);
-  border: 1px solid rgb(44, 44, 44);
-  color: #f5f5f5;
-  white-space: nowrap;
+  background: linear-gradient(45deg, #3b82f6, #6366f1); /* Gradient background */
+  border: none;
+  color: #ffffff;
 }
 
-.signInButton:hover,
 .registerButton:hover {
-  opacity: 0.9;
-}
-
-.languageSelector {
-  aspect-ratio: 1.54;
-  object-fit: contain;
-  object-position: center;
-  width: 74px;
-  align-self: stretch;
-  margin: auto 0;
-  flex-shrink: 0;
-  cursor: pointer;
+  background: linear-gradient(45deg, #2563eb, #4f46e5); /* Darker gradient on hover */
+  transform: translateY(-2px);
 }
 
 .rightButtons {
-  align-self: stretch;
   display: flex;
-  margin: auto 0;
   align-items: center;
-  gap: 12px;
-  justify-content: start;
-  flex-grow: 1;
-  flex-shrink: 1;
-  width: 5%;
+  gap: 1rem;
 }
 
+.rightButtons svg {
+  color: #1e1e1e;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.rightButtons svg:hover {
+  color: #3b82f6; /* Highlight color on hover */
+}
+
+/* Responsive Design */
 @media (max-width: 991px) {
+  .header {
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
   .navigation {
-    max-width: 100%;
-    white-space: initial;
+    order: 3;
+    width: 100%;
+    justify-content: center;
   }
 
-  .navPill {
-    white-space: initial;
-  }
-
-  .registerButton {
-    white-space: initial;
+  .rightSection {
+    order: 2;
+    margin-left: auto;
   }
 }

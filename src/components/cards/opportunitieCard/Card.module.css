@@ -1,0 +1,88 @@
+/* Card Container */
+.card {
+    width: 100%;
+    max-width: 250px; /* Fixed width */
+    height: 280px; /* Fixed height */
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden; /* Ensure nothing overflows */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Card Image */
+.cardImage {
+    width: 80%; /* Full width of the container */
+    height: 200px; /* Fixed height for the image container */
+    overflow: hidden; /* Ensure the image doesn't overflow */
+    position: relative; /* For positioning if needed */
+}
+
+.cardImage img {
+    width: 100%; /* Make the image take up the full width of the container */
+    height: 100%; /* Make the image take up the full height of the container */
+    object-fit: cover; /* Ensure the image covers the entire area without distortion */
+}
+
+/* Card Content */
+.cardContent {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    flex-grow: 1; /* Allow content to grow and fill remaining space */
+}
+
+/* Card Title (Name) */
+.cardTitle {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
+    white-space: nowrap; /* Prevent text from wrapping */
+    overflow: hidden; /* Hide overflow */
+    text-overflow: ellipsis; /* Add ellipsis for long text */
+}
+
+/* Organizer Name */
+.cardOrganizer {
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+    white-space: nowrap; /* Prevent text from wrapping */
+    overflow: hidden; /* Hide overflow */
+    text-overflow: ellipsis; /* Add ellipsis for long text */
+}
+
+/* Views and End Date Container */
+.cardDetails {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    color: #888;
+}
+
+/* Views */
+.cardViews {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* End Date */
+.cardEndDate {
+    font-style: italic;
+    white-space: nowrap; /* Prevent text from wrapping */
+    overflow: hidden; /* Hide overflow */
+    text-overflow: ellipsis; /* Add ellipsis for long text */
+}

@@ -1,0 +1,278 @@
+.pageContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  width: 100%;
+  min-height: 100vh; /* Full viewport height */
+  background-color: white;
+  margin: 0;
+  overflow: hidden; /* Prevent scrollbars */
+  height: auto;
+}
+
+/* Sidebar Container */
+.sideBar {
+  min-width: 12%;
+  max-width: 20%;
+  background-color: white; /* White background */
+  border: 1px solid #e0e0e0; /* Light border */
+  border-radius: 15px; /* Rounded corners */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  padding: 20px; /* Padding inside the sidebar */
+  margin: 20px; /* Margin to separate from the main content */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center buttons horizontally */
+  height: calc(100vh - 40px); /* Full height minus margin */
+  overflow-y: auto; /* Scroll if content overflows */
+  height: auto;
+}
+
+/* Sidebar List */
+.sideBarList {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center buttons horizontally */
+  gap: 15px; /* Spacing between buttons */
+}
+
+/* Sidebar Button */
+.sideBarbutton {
+  width: 100%; /* Full width to accommodate text */
+  padding: 12px 20px; /* Padding inside the button */
+  display: flex;
+  flex-direction: row; /* Align icon and text horizontally */
+  align-items: center;
+  justify-content: flex-start; /* Align items to the left */
+  background-color: transparent; /* Transparent background */
+  border: 1px solid #e0e0e0; /* Light border */
+  border-radius: 10px; /* Slightly rounded corners */
+  color: #1e1e1e; /* Dark text color */
+  font-size: 16px; /* Font size */
+  font-weight: 500; /* Medium font weight */
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease; /* Smooth transition */
+  white-space: nowrap; /* Prevent text from wrapping */
+  overflow: visible; /* Ensure text is fully visible */
+  text-overflow: clip; /* Disable ellipsis */
+}
+
+.sideBarbutton:hover {
+  background-color: #f5f5f5; /* Light gray background on hover */
+  transform: translateX(5px); /* Slight move to the right */
+  border-color: #3b82f6; /* Blue border on hover */
+}
+
+.sideBarbutton p {
+  margin: 0 0 0 15px; /* Spacing between icon and text */
+  white-space: nowrap; /* Prevent text from wrapping */
+  overflow: hidden; /* Hide overflow */
+  text-overflow: ellipsis; /* Add ellipsis for long text */
+}
+
+.sideBarbutton .icon {
+  font-size: 18px; /* Icon size */
+  color: #3b82f6; /* Blue icon color */
+}
+
+/* Active Sidebar Button */
+.sideBarbutton.active {
+  background-color: #3b82f6; /* Blue background for active button */
+  border-color: #3b82f6; /* Blue border for active button */
+  color: white; /* White text for active button */
+}
+
+.sideBarbutton.active .icon {
+  color: white; /* White icon for active button */
+}
+
+
+
+/* Main Content */
+.listLayout {
+  flex: 1 1 auto; /* Allows it to grow and shrink */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  background-color: white;
+  padding: 20px;
+  margin: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  min-height: 0; /* Ensures it doesn't force parent to grow */
+  height: calc(100vh - 40px); /* Adjust for margin */
+  overflow: hidden; /* Prevents it from overflowing */
+  height: auto;
+}
+
+/* Title */
+.listLayoutTitle {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background-color: white;
+  font-size: 28px; /* Larger font size */
+  font-weight: 700; /* Bold font weight */
+  color: #2c3e50; /* Dark blue text */
+  text-transform: uppercase; /* Uppercase text */
+  letter-spacing: 1.5px; /* Increased letter spacing */
+  flex-shrink: 0;
+}
+
+/* Search Bar */
+.listLayoutSearch {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 8%;
+  background-color: white;
+  gap: 20px;
+  padding: 10px 20px; /* Added padding */
+  flex-shrink: 0;
+}
+
+.listLayoutSearchInput {
+  width: 100%;
+  max-width: 400px;
+  padding: 12px 20px; /* Increased padding */
+  font-size: 16px;
+  border: 2px solid #bdc3c7; /* Light gray border */
+  border-radius: 30px; /* Fully rounded corners */
+  outline: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.listLayoutSearchInput:hover {
+  border-color: #95a5a6; /* Darker gray on hover */
+}
+
+.listLayoutSearchInput:focus {
+  border-color: #6001d2; /* Purple border on focus */
+  box-shadow: 0 2px 10px rgba(96, 1, 210, 0.2);
+}
+
+/* Buttons */
+/* Base Button Styles */
+.searchButton,
+.addButton,
+.sortButton,
+.paginationButton {
+  padding: 12px 24px; /* Increased padding */
+  font-size: 16px;
+  font-weight: 600; /* Bold text */
+  color: #ffffff; /* White text */
+  border: none;
+  border-radius: 30px; /* Fully rounded corners */
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease; /* Smooth transition */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Space between icon and text */
+}
+
+/* Search Button */
+.searchButton {
+  background: linear-gradient(45deg, #3b82f6, #6366f1); /* Blue gradient */
+}
+
+.searchButton:hover {
+  background: linear-gradient(45deg, #2563eb, #4f46e5); /* Darker blue gradient on hover */
+  transform: translateY(-2px); /* Slight lift */
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Larger shadow on hover */
+}
+
+.searchButton:active {
+  background: linear-gradient(45deg, #1e40af, #3730a3); /* Even darker blue gradient on click */
+  transform: scale(0.98); /* Slightly shrink */
+}
+
+/* Add Opportunity Button */
+.addButton {
+  background: linear-gradient(45deg, #10b981, #059669); /* Green gradient */
+}
+
+.addButton:hover {
+  background: linear-gradient(45deg, #059669, #047857); /* Darker green gradient on hover */
+  transform: translateY(-2px); /* Slight lift */
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Larger shadow on hover */
+}
+
+.addButton:active {
+  background: linear-gradient(45deg, #065f46, #064e3b); /* Even darker green gradient on click */
+  transform: scale(0.98); /* Slightly shrink */
+}
+
+/* Sort Button */
+.sortButton {
+  background: linear-gradient(45deg, #f97316, #ea580c); /* Orange gradient */
+}
+
+.sortButton:hover {
+  background: linear-gradient(45deg, #ea580c, #c2410c); /* Darker orange gradient on hover */
+  transform: translateY(-2px); /* Slight lift */
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Larger shadow on hover */
+}
+
+.sortButton:active {
+  background: linear-gradient(45deg, #9a3412, #7c2d12); /* Even darker orange gradient on click */
+  transform: scale(0.98); /* Slightly shrink */
+}
+
+/* Pagination Button */
+.paginationButton {
+  background: linear-gradient(45deg, #6b7280, #4b5563); /* Gray gradient */
+}
+
+.paginationButton:hover {
+  background: linear-gradient(45deg, #4b5563, #374151); /* Darker gray gradient on hover */
+  transform: translateY(-2px); /* Slight lift */
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Larger shadow on hover */
+}
+
+.paginationButton:active {
+  background: linear-gradient(45deg, #374151, #1f2937); /* Even darker gray gradient on click */
+  transform: scale(0.98); /* Slightly shrink */
+}
+
+/* Disabled Pagination Button */
+.paginationButton:disabled {
+  background: linear-gradient(45deg, #9ca3af, #6b7280); /* Lighter gray gradient for disabled state */
+  cursor: not-allowed; /* Disable cursor */
+  opacity: 0.7; /* Reduce opacity */
+  transform: none; /* Remove hover effect */
+  box-shadow: none; /* Remove shadow */
+}
+
+/* Cards Grid */
+.listLayoutCards {
+  flex: 1 1 auto; /* Ensures it takes up available space */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  min-height: 0; /* Prevents it from forcing the parent to grow */
+  height: auto;
+}
+
+/* Pagination */
+.paginationContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  gap: 10px;
+}
+
+.paginationText {
+  font-size: 16px;
+  font-weight: bold;
+  color: #2c3e50; /* Dark blue text */
+}

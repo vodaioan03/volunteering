@@ -1,0 +1,38 @@
+.container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.chartContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.chart {
+  flex: 1 1 45%; /* Adjust the width of each chart container */
+  min-width: 400px; /* Increase the minimum width */
+  height: 400px; /* Increase the height */
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.chart canvas {
+  width: 90% !important; /* Ensure the canvas fills the container */
+  height: 90% !important; /* Ensure the canvas fills the container */
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 24px; /* Increase the title font size */
+}
+
+.subtitle {
+  text-align: center;
+  margin-bottom: 20px; /* Increase the margin */
+  font-size: 20px; /* Increase the subtitle font size */
+}

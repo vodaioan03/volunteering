@@ -1,0 +1,103 @@
+.header {
+    display: flex;
+    margin-top: 7px;
+    width: 100%;
+    padding: 8px 24px;
+    align-items: flex-start;
+    gap: 24px;
+    font-family: Roboto, -apple-system, Helvetica, sans-serif;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+  
+  .headerImage {
+    aspect-ratio: 1;
+    object-fit: contain;
+    object-position: center;
+    width: 216px;
+    border-radius: 28px;
+    flex-shrink: 0;
+  }
+  
+  .contentWrapper {
+    min-width: 240px;
+    flex: 1;
+    flex-shrink: 1;
+    flex-basis: 0%;
+  }
+  
+  .headlineContent {
+    width: 100%;
+    color: #1d1b20;
+    font-weight: 400;
+  }
+  
+  .opportunityTitle {
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    text-overflow: ellipsis;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: 0;
+  }
+  
+  .publishedDate {
+    color: #49454f;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+  }
+  
+  .supportingText {
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 7;
+    text-overflow: ellipsis;
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 0.25px;
+    margin-top: 4px;
+  }
+  
+  .buttonGroup {
+    display: flex;
+    margin-top: 24px;
+    width: 358px;
+    max-width: 100%;
+    align-items: flex-start;
+    gap: 42px;
+    font-size: 14px;
+    color: #ffffff;
+    font-weight: 500;
+    white-space: nowrap;
+    text-align: center;
+    letter-spacing: 0.1px;
+    line-height: 1;
+    justify-content: space-between;
+  }
+  
+  .button {
+    justify-content: center;
+    align-items: stretch;
+    border-radius: 100px;
+    background-color: #65558f;
+    display: flex;
+    min-height: 40px;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 10px 24px;
+    cursor: pointer;
+  }
+  
+  .buttonUpdate {
+    width: 94px;
+  }
+  
+  .buttonDelete {
+    width: 89px;
+  }
+  
+  .buttonApply {
+    width: 90px;
+  }

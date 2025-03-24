@@ -1,10 +1,8 @@
 "use client";
 import React from "react";
-import styles from "./Footer.module.css"
+import styles from "./Footer.module.css";
 import Image from "next/image";
-import Logo from "../../utils/images/logo.png"
-
-
+import Logo from "../../utils/images/logo.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faFacebook,
@@ -16,13 +14,14 @@ import {
 const Footer = () => {
   return (
     <footer className={styles.footer}>
+      {/* Social Section */}
       <div className={styles.socialSection}>
         <div className={styles.logoWrapper}>
           <Image
             src={Logo}
             alt="Company Logo"
-            width={34}
-            height={34}
+            width={40}
+            height={40}
             className={styles.logo}
           />
         </div>
@@ -34,6 +33,7 @@ const Footer = () => {
         </div>
       </div>
 
+      {/* Link Sections */}
       <div className={styles.linkSection}>
         <h3 className={styles.columnTitle}>Explore</h3>
         <nav className={styles.linkList}>
@@ -87,6 +87,10 @@ const Footer = () => {
           </a>
         </nav>
       </div>
+
+      {/* Decorative elements */}
+      <div className={`${styles.decorativeCircle} ${styles.decorativeCircleTop}`}></div>
+      <div className={`${styles.decorativeCircle} ${styles.decorativeCircleBottom}`}></div>
     </footer>
   );
 };

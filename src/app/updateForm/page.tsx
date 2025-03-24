@@ -1,62 +1,85 @@
 "use client";
-import React, { useState,useEffect } from "react";
-import styles from "./CreateForm.module.css";
-import UserAvatar from "../../components/userAvatar/UserAvatar";
+import React, { useState } from "react";
+import styles from "./UpdateForm.module.css";
 import { createPortal } from "react-dom";
 
 const inputFields = [
-  { label: "Opportunity Name", name: "opportunityName" },
-  { label: "Organization Name", name: "organizationName" },
+  { label: "Name", name: "name" },
+  { label: "Image", name: "image" }, // Image field for URL input
   { label: "Short Description", name: "shortDescription" },
-  { label: "Description", name: "description" },
-  { label: "Days", name: "days" },
+  { label: "End Date", name: "endDate" },
 ];
 
 interface UpdateFormProps {
-  onClose: () => void;
-  onUpdateOpportunity: (newOpportunity: { [key: string]: string }) => void;
-  updatedTitle: string;
-  updatedOrganizer: string;
-  updatedShortDesc: string;
-  updatedDesc: string;
-  setUpdatedTitle: (value: string) => void;
-  setUpdatedOrganizer: (value: string) => void;
-  setUpdatedShortDesc: (value: string) => void;
-  setUpdatedDesc: (value: string) => void;
+  onClose: () => void; // Function to close the modal
+  onUpdateOpportunity: (updatedOpportunity: { [key: string]: string }) => void; // Callback to handle the update of an opportunity
+  initialData: {
+    name: string;
+    organizer: string;
+    shortDescription: string;
+    endDate: string;
+    image: string; // Optional image URL
+  }; // Initial data for the form
 }
 
 const UpdateForm: React.FC<UpdateFormProps> = ({
   onClose,
   onUpdateOpportunity,
-  updatedTitle,
-  updatedOrganizer,
-  updatedShortDesc,
-  updatedDesc,
-  setUpdatedTitle,
-  setUpdatedOrganizer,
-  setUpdatedShortDesc,
-  setUpdatedDesc,
+  initialData,
 }) => {
+  const [formData, setFormData] = useState(initialData);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
   // Handle input change
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    setter: React.Dispatch<React.SetStateAction<string>>
-  ) => {
-    const { value } = e.target;
-    setter(value);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value, // Update the specific field
+    }));
+  };
+
+  // Validate form fields
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {};
+    let isValid = true;
+
+    const startWithLettersRegex = /^[A-Za-z]{2,}/;
+
+    // Required fields validation
+    inputFields.forEach((field) => {
+      const value = formData[field.name as keyof typeof formData];
+
+      // Check if the value is empty
+      if (!value) {
+        newErrors[field.name] = `${field.label} is required.`;
+        isValid = false;
+      } else if (field.name !== "endDate" && !startWithLettersRegex.test(value)) {
+        // Check if the value starts with at least two letters (except for endDate)
+        newErrors[field.name] = `${field.label} must start with at least two letters.`;
+        isValid = false;
+      }
+    });
+
+    // End Date validation (should be a valid date)
+    if (formData.endDate && isNaN(new Date(formData.endDate).getTime())) {
+      newErrors["endDate"] = "End Date must be a valid date.";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
   };
 
   // Handle form submit
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onUpdateOpportunity({
-      opportunityName: updatedTitle,
-      organizationName: updatedOrganizer,
-      shortDescription: updatedShortDesc,
-      description: updatedDesc,
-      days: "", // Assuming 'days' can be updated as well, but not provided here
-    });
-    onClose();
+    if (validateForm()) {
+      onUpdateOpportunity({
+        ...formData, // Include all fields, including the `id`
+      });
+      onClose();
+    }
   };
 
   return createPortal(
@@ -67,53 +90,55 @@ const UpdateForm: React.FC<UpdateFormProps> = ({
 
           <div className={styles.header}>Update Opportunity</div>
 
-          <div className={styles.profileSection}>
-            <UserAvatar />
-            <div className={styles.organizationInputWrapper}>
-              <input
-                type="text"
-                placeholder="Organization Name"
-                value={updatedOrganizer}
-                onChange={(e) => handleInputChange(e, setUpdatedOrganizer)}
-                className={styles.organizationInput}
-              />
-            </div>
+          {/* Image Display */}
+          <div className={styles.imageContainer}>
+            <img
+              key={formData.image} // Force re-render when image URL changes
+              src={formData.image || "https://via.placeholder.com/120"} // Default placeholder image
+              alt="Opportunity"
+              onError={(e) => {
+                // Fallback to placeholder if the image URL is invalid
+                e.currentTarget.src = "https://via.placeholder.com/120";
+              }}
+            />
           </div>
 
+          {/* Organizer Field */}
+          <div className={styles.organizationInputWrapper}>
+            <input
+              type="text"
+              placeholder="Organizer"
+              name="organizer"
+              value={formData.organizer}
+              onChange={handleInputChange}
+              className={styles.organizationInput}
+            />
+            {errors.organizer && <div className={styles.errorText}>{errors.organizer}</div>}
+          </div>
+
+          {/* Form Fields */}
           <form className={styles.formGrid} onSubmit={handleSubmit}>
-            <div className={styles.inputGroup}>
-              <div className={styles.label}>Opportunity Name</div>
-              <input
-                type="text"
-                value={updatedTitle}
-                onChange={(e) => handleInputChange(e, setUpdatedTitle)}
-                className={styles.input}
-              />
-            </div>
-
-            <div className={styles.inputGroup}>
-              <div className={styles.label}>Short Description</div>
-              <input
-                type="text"
-                value={updatedShortDesc}
-                onChange={(e) => handleInputChange(e, setUpdatedShortDesc)}
-                className={styles.input}
-              />
-            </div>
-
-            <div className={styles.inputGroup}>
-              <div className={styles.label}>Description</div>
-              <input
-                type="text"
-                value={updatedDesc}
-                onChange={(e) => handleInputChange(e, setUpdatedDesc)}
-                className={styles.input}
-              />
-            </div>
-
-            <button type="submit" className={styles.createButton}>Update Opportunity</button>
+            {inputFields.map((field, index) => (
+              <div key={index} className={styles.inputGroup}>
+                <div className={styles.label}>{field.label}</div>
+                <input
+                  type={field.name === "endDate" ? "date" : "text"} // Use "date" input for endDate
+                  name={field.name}
+                  value={formData[field.name as keyof typeof formData]}
+                  onChange={handleInputChange}
+                  className={styles.input}
+                />
+                {errors[field.name] && <div className={styles.errorText}>{errors[field.name]}</div>}
+              </div>
+            ))}
           </form>
 
+          {/* Create Button */}
+          <button type="submit" className={styles.createButton} onClick={handleSubmit}>
+            Update Opportunity
+          </button>
+
+          {/* Footer */}
           <div className={styles.footer}>
             <div className={styles.footerText}>Volunteering</div>
             <div className={styles.footerDot}>•</div>

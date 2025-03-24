@@ -1,0 +1,54 @@
+.section {
+    margin-top: 7px;
+    width: 100%;
+    padding-bottom: 32px;
+    overflow: hidden;
+  }
+  
+  .sectionHeader {
+    display: flex;
+    width: 100%;
+    padding: 8px 24px;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+  
+  .sectionTitle {
+    color: #1d1b20;
+    font-family: Roboto, -apple-system, Helvetica, sans-serif;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: 0;
+    align-self: stretch;
+    margin: auto 0;
+  }
+  
+  .organizerCard {
+    width: 100%;
+    padding: 0 24px;
+  }
+  
+  .organizerContent {
+    display: flex;
+    width: 100%;
+    align-items: stretch;
+    gap: 16px;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+  
+  .organizerInfo {
+    min-width: 240px;
+    flex: 1;
+    flex-shrink: 1;
+    flex-basis: 0%;
+  }
+  
+  .organizerName {
+    color: #1d1b20;
+    font-size: 22px;
+    line-height: 1;
+    letter-spacing: 0;
+  }

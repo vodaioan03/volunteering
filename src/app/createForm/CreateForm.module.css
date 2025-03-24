@@ -1,191 +1,154 @@
+/* Container for the modal overlay */
 .container {
-  width: 545px;
-  min-height: 644px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  left:30%;
-  font-family: "Inter", sans-serif;
-  background-color: rgba(255, 254, 254, 0.85);
-}
-
-
-.modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 1000; /* Ensure it's on top of other elements */
 }
 
+/* Modal content */
 .modalContent {
-  width: 545px;
-  min-height: 644px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  background-color: white;
+  border-radius: 16px; /* Rounded corners */
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); /* Stronger shadow for depth */
+  width: 90%;
+  max-width: 500px; /* Limit maximum width */
+  padding: 32px; /* Increased padding */
   position: relative;
-  font-family: "Inter", sans-serif;
-  background-color: rgba(255, 254, 254, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.18); /* Subtle border for glass effect */
+  backdrop-filter: blur(10px); /* Glassmorphism effect */
 }
 
+/* Close button */
 .closeButton {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 16px;
+  right: 16px;
   background: none;
   border: none;
-  font-size: 18px;
+  font-size: 24px; /* Larger close button */
   cursor: pointer;
-  color: #333;
+  color: #666;
+  transition: color 0.3s ease;
 }
 
+.closeButton:hover {
+  color: #333; /* Darker color on hover */
+}
 
-
+/* Header */
 .header {
-  font-family: "Roboto", sans-serif;
-  font-size: 24px;
-  font-weight: 400;
-  color: #000;
-  line-height: 32px;
-  width: 100%;
-  padding: 15px 24px;
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  font-size: 28px; /* Larger font size */
+  font-weight: bold;
+  color: #2c3e50; /* Dark blue text */
+  margin-bottom: 24px; /* Increased margin */
+  text-align: center;
+  text-transform: uppercase; /* Uppercase text */
+  letter-spacing: 1px; /* Slight letter spacing */
 }
 
+/* Profile section */
 .profileSection {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 5px;
-  padding: 20px 0;
+  gap: 16px;
+  margin-bottom: 24px; /* Increased margin */
 }
 
-.organizationInputWrapper {
-  width: 240px; /* Keep it consistent */
-  padding: 12px 16px;
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  border-radius: 9999px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #fff;
-}
-
-.organizationInput {
-  width: 100%;
-  min-width: 240px; /* Ensure consistency */
-  border: none; /* Remove double border */
-  outline: none;
-  text-align: center;
-  font-size: 16px;
-  color: #1e1e1e;
-  font-family: "Inter", sans-serif;
-  padding: 8px 16px;
-  border-radius: 9999px; /* Match with wrapper for consistency */
-  background-color: transparent; /* Blend with wrapper */
-}
-
-
-.formGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  width: 100%;
-  max-width: 500px;
-}
-
+/* Input fields */
 .inputGroup {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 8px;
+  margin-bottom: 20px; /* Increased margin */
 }
 
 .label {
-  font-size: 16px;
-  color: #1e1e1e;
-  line-height: 140%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 8px;
+  font-weight: 500; /* Medium font weight */
 }
 
 .input {
-  min-width: 140px;
-  max-width: 240px;
-  padding: 8px 16px;
-  border: 1px solid rgba(0, 0, 0, 0.2);
+  width: 100%;
+  padding: 12px; /* Increased padding */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #333;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.input:focus {
+  border-color: #6001d2; /* Purple border on focus */
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(96, 1, 210, 0.1); /* Purple glow */
+}
+
+/* Date input */
+.dateInput {
+  padding: 12px; /* Increased padding */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #333;
+  width: 100%;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dateInput:focus {
+  border-color: #6001d2; /* Purple border on focus */
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(96, 1, 210, 0.1); /* Purple glow */
+}
+
+/* Error text */
+.errorText {
+  font-size: 12px;
+  color: #ff4d4d; /* Red error text */
+  margin-top: 4px;
+}
+
+/* Create button */
+.createButton {
+  width: 100%;
+  padding: 14px; /* Increased padding */
+  background: linear-gradient(45deg, #3b82f6, #6366f1); /* Blue gradient */
+  color: white;
+  border: none;
   border-radius: 8px;
   font-size: 16px;
-  color: #1e1e1e;
-  background-color: #fff;
-  text-align: center;
-}
-
-.createButton {
-  width: 175px;
-  height: 40px;
-  color: #fff;
-  border: none;
-  border-radius: 100px;
-  font-family: "Roboto", sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  margin: 20px 0;
+  font-weight: bold;
   cursor: pointer;
-  background-color: #65558f;
-  
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
 }
 
+.createButton:hover {
+  background: linear-gradient(45deg, #2563eb, #4f46e5); /* Darker blue gradient on hover */
+  transform: translateY(-2px); /* Slight lift */
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Larger shadow on hover */
+}
+
+.createButton:active {
+  background: linear-gradient(45deg, #1e40af, #3730a3); /* Even darker blue gradient on click */
+  transform: scale(0.98); /* Slightly shrink */
+}
+
+/* Footer */
 .footer {
   display: flex;
-  align-items: center;
+  justify-content: center;
   gap: 8px;
-  margin-top: auto;
-  padding: 20px 0;
-}
-
-.footerText {
-  color: #666;
+  margin-top: 24px; /* Increased margin */
   font-size: 14px;
+  color: #666;
 }
 
 .footerDot {
-  color: #666;
-}
-
-@media (max-width: 640px) {
-  .container {
-    width: 100%;
-  }
-
-  .formGrid {
-    grid-template-columns: 1fr;
-    padding: 10px;
-  }
-
-  .inputGroup {
-    width: 100%;
-  }
-
-  .input {
-    width: 100%;
-    min-width: unset;
-  }
-
-  .organizationInput {
-    width: 100%;
-    min-width: unset;
-  }
+  color: #999; /* Light gray dot */
 }

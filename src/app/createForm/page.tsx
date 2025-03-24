@@ -5,25 +5,25 @@ import UserAvatar from "../../components/userAvatar/UserAvatar";
 import { createPortal } from "react-dom";
 
 const inputFields = [
-  { label: "Opportunity Name", name: "opportunityName" },
-  { label: "Organization Name", name: "organizationName" },
+  { label: "Image", name: "image"},
+  { label: "Name", name: "name" },
   { label: "Short Description", name: "shortDescription" },
-  { label: "Description", name: "description" },
-  { label: "Days", name: "days" },
+  { label: "End Date", name: "endDate" },
+  
 ];
 
 interface CreateFormProps {
-  onClose: () => void; // Type for the function prop
+  onClose: () => void; // Function to close the modal
   onCreateOpportunity: (newOpportunity: { [key: string]: string }) => void; // Callback to handle the creation of a new opportunity
 }
 
 const CreateForm: React.FC<CreateFormProps> = ({ onClose, onCreateOpportunity }) => {
   const [formData, setFormData] = useState({
-    opportunityName: "",
-    organizationName: "",
+    name: "",
+    organizer: "",
     shortDescription: "",
-    description: "",
-    days: "",
+    endDate: "",
+    image:"",
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -42,25 +42,35 @@ const CreateForm: React.FC<CreateFormProps> = ({ onClose, onCreateOpportunity })
     const newErrors: { [key: string]: string } = {};
     let isValid = true;
 
-
     const startWithLettersRegex = /^[A-Za-z]{2,}/;
+
     // Required fields validation
     inputFields.forEach((field) => {
-      const value = formData[field.name];
-      
+      const value = formData[field.name as keyof typeof formData];
+
       // Check if the value is empty
       if (!value) {
         newErrors[field.name] = `${field.label} is required.`;
         isValid = false;
-      } else if (!startWithLettersRegex.test(value) && !formData.days) {
-        // Check if the value starts with at least two letters
+      } else if (field.name !== "endDate" && !startWithLettersRegex.test(value)) {
+        // Check if the value starts with at least two letters (except for endDate)
         newErrors[field.name] = `${field.label} must start with at least two letters.`;
         isValid = false;
       }
     });
-    // Days validation (should be a number)
-    if (formData.days && isNaN(Number(formData.days))) {
-      newErrors["days"] = "Days must be a valid number.";
+
+    // Organizer validation
+    if (!formData.organizer) {
+      newErrors["organizer"] = "Organizer is required.";
+      isValid = false;
+    } else if (!startWithLettersRegex.test(formData.organizer)) {
+      newErrors["organizer"] = "Organizer must start with at least two letters.";
+      isValid = false;
+    }
+
+    // End Date validation (should be a valid date)
+    if (formData.endDate && isNaN(new Date(formData.endDate).getTime())) {
+      newErrors["endDate"] = "End Date must be a valid date.";
       isValid = false;
     }
 
@@ -81,30 +91,33 @@ const CreateForm: React.FC<CreateFormProps> = ({ onClose, onCreateOpportunity })
     <div className={styles.container}>
       <div className={styles.modalOverlay} onClick={onClose}>
         <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-          <button className={styles.closeButton} onClick={onClose}>✖</button>
+          <button className={styles.closeButton} onClick={onClose}>
+            ✖
+          </button>
 
           <div className={styles.header}>Create Opportunity</div>
 
-          <div className={styles.profileSection}>
-            <UserAvatar />
-            <div className={styles.organizationInputWrapper}>
+          <form className={styles.formGrid} onSubmit={handleSubmit}>
+            {/* Organizer Field */}
+            <div className={styles.inputGroup}>
+              <div className={styles.label}>Organizer</div>
               <input
                 type="text"
-                placeholder="Organization Name"
-                name="organizationName"
-                value={formData.organizationName}
+                placeholder="Organizer"
+                name="organizer"
+                value={formData.organizer}
                 onChange={handleInputChange}
-                className={styles.organizationInput}
+                className={styles.input}
               />
+              {errors.organizer && <div className={styles.errorText}>{errors.organizer}</div>}
             </div>
-          </div>
 
-          <form className={styles.formGrid} onSubmit={handleSubmit}>
+            {/* Other Fields */}
             {inputFields.map((field, index) => (
               <div key={index} className={styles.inputGroup}>
                 <div className={styles.label}>{field.label}</div>
                 <input
-                  type="text"
+                  type={field.name === "endDate" ? "date" : "text"} // Use "date" input for endDate
                   name={field.name}
                   value={formData[field.name as keyof typeof formData]}
                   onChange={handleInputChange}
@@ -113,9 +126,14 @@ const CreateForm: React.FC<CreateFormProps> = ({ onClose, onCreateOpportunity })
                 {errors[field.name] && <div className={styles.errorText}>{errors[field.name]}</div>}
               </div>
             ))}
-            <button type="submit" className={styles.createButton}>Create Opportunity</button>
+
+            {/* Create Button */}
+            <button type="submit" className={styles.createButton}>
+              Create Opportunity
+            </button>
           </form>
 
+          {/* Footer */}
           <div className={styles.footer}>
             <div className={styles.footerText}>Volunteering</div>
             <div className={styles.footerDot}>•</div>

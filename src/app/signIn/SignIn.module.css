@@ -1,124 +1,143 @@
+/* Modal Overlay */
 .modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.5); /* Darker overlay for better contrast */
+  backdrop-filter: blur(10px); /* Glassmorphism effect */
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
 }
 
+/* Modal Content */
 .modalContent {
-  width: 545px;
-  min-height: 100px;
+  width: 500px;
+  min-height: 400px;
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
-  font-family: "Inter", sans-serif;
-  background-color: rgba(255, 254, 254, 0.85);
+  background: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
+  backdrop-filter: blur(10px); /* Glassmorphism effect */
+  border-radius: 16px; /* Rounded corners */
+  border: 1px solid rgba(255, 255, 255, 0.18); /* Subtle border */
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); /* Soft shadow */
+  padding: 2rem;
 }
 
+/* Close Button */
 .closeButton {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 1rem;
+  right: 1rem;
   background: none;
   border: none;
-  font-size: 18px;
+  font-size: 1.5rem;
   cursor: pointer;
-  color: #333;
+  color: #1e1e1e;
+  transition: color 0.3s ease;
 }
 
+.closeButton:hover {
+  color: #3b82f6; /* Highlight color on hover */
+}
 
-
+/* Header */
 .header {
   font-family: "Roboto", sans-serif;
-  font-size: 24px;
-  font-weight: 400;
-  color: #000;
-  line-height: 32px;
-  width: 100%;
-  padding: 15px 24px;
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  font-size: 2rem;
+  font-weight: 600;
+  color: #1e1e1e;
+  margin-bottom: 1.5rem;
+  text-align: center;
 }
 
-
+/* Form Grid */
 .formGrid {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 1.5rem;
   width: 100%;
-  max-width: 500px;
 }
 
+/* Input Group */
 .inputGroup {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0.5rem;
   width: 100%;
 }
 
 .label {
-  font-size: 16px;
+  font-size: 1rem;
   color: #1e1e1e;
-  line-height: 140%;
+  font-weight: 500;
 }
 
 .input {
   width: 100%;
-  padding: 8px 16px;
+  padding: 0.75rem 1rem;
   border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 1rem;
   color: #1e1e1e;
-  background-color: #fff;
-  text-align: center;
+  background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+  backdrop-filter: blur(10px); /* Glassmorphism effect */
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
+.input:focus {
+  border-color: #3b82f6; /* Highlight border on focus */
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); /* Focus ring */
+  outline: none;
+}
+
+/* Create Button */
 .createButton {
-  width: 175px;
-  height: 40px;
-  color: #fff;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  color: #ffffff;
   border: none;
-  border-radius: 100px;
+  border-radius: 8px;
   font-family: "Roboto", sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  margin: 20px 0;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  background-color: #000;
-  text-align: center; /* Ensures the text is centered */
-  display: inline-flex; /* Use flex to center the content properly */
-  justify-content: center; /* Center horizontally */
-  align-items: center; /* Center vertically */
+  background: linear-gradient(45deg, #3b82f6, #6366f1); /* Gradient background */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-align: center;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  margin: 2rem;
 }
 
+.createButton:hover {
+  transform: translateY(-2px); /* Lift effect on hover */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Shadow on hover */
+}
 
+/* Responsive Design */
 @media (max-width: 640px) {
   .modalContent {
-    width: 100%;
+    width: 90%;
+    padding: 1.5rem;
   }
 
-  .formGrid {
-    grid-template-columns: 1fr;
-    padding: 10px;
-  }
-
-  .inputGroup {
-    width: 100%;
+  .header {
+    font-size: 1.5rem;
   }
 
   .input {
-    width: 100%;
-    min-width: unset;
+    padding: 0.5rem 1rem;
+  }
+
+  .createButton {
+    padding: 0.5rem 1rem;
   }
 }

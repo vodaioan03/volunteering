@@ -17,6 +17,7 @@ const Header = () => {
 
   return (
     <header className={styles.header}>
+      {/* Left Section */}
       <div className={styles.leftSection}>
         <Link href="/" passHref>
           <Image
@@ -29,8 +30,8 @@ const Header = () => {
         </Link>
       </div>
 
+      {/* Navigation */}
       <nav className={styles.navigation}>
-        {/* Change the active class dynamically based on state */}
         <Link
           href="/"
           className={`${styles.navPill} ${activeLink === "home" ? styles.active : ""}`}
@@ -39,18 +40,18 @@ const Header = () => {
           Home Page
         </Link>
         <Link
-          href="/opportunities"
+          href="/volunteers"
           className={`${styles.navPill} ${activeLink === "opportunities" ? styles.active : ""}`}
           onClick={() => setActiveLink("opportunities")}
         >
           Opportunities
         </Link>
         <Link
-          href="/donations"
-          className={`${styles.navPill} ${activeLink === "donations" ? styles.active : ""}`}
-          onClick={() => setActiveLink("donations")}
+          href="/analytics"
+          className={`${styles.navPill} ${activeLink === "analytics" ? styles.active : ""}`}
+          onClick={() => setActiveLink("analytics")}
         >
-          Donations
+          Analytics
         </Link>
         <Link
           href="/about"
@@ -68,6 +69,7 @@ const Header = () => {
         </Link>
       </nav>
 
+      {/* Right Section */}
       <div className={styles.rightSection}>
         <div className={styles.authButtons}>
           <button onClick={() => setModalType("login")} className={styles.signInButton}>
