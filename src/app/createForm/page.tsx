@@ -1,34 +1,40 @@
 "use client";
 import React, { useState } from "react";
 import styles from "./CreateForm.module.css";
-import UserAvatar from "../../components/userAvatar/UserAvatar";
 import { createPortal } from "react-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleExclamation } from "@fortawesome/free-solid-svg-icons";
 
 const inputFields = [
-  { label: "Image", name: "image"},
+  { label: "Image URL", name: "image" },
   { label: "Name", name: "name" },
   { label: "Short Description", name: "shortDescription" },
   { label: "End Date", name: "endDate" },
-  
 ];
 
 interface CreateFormProps {
-  onClose: () => void; // Function to close the modal
-  onCreateOpportunity: (newOpportunity: { [key: string]: string }) => void; // Callback to handle the creation of a new opportunity
+  onClose: () => void;
+  onCreateOpportunity: (newOpportunity: { [key: string]: string }) => void;
+  isOnline: boolean;
 }
 
-const CreateForm: React.FC<CreateFormProps> = ({ onClose, onCreateOpportunity }) => {
+const CreateForm: React.FC<CreateFormProps> = ({ 
+  onClose, 
+  onCreateOpportunity,
+  isOnline 
+}) => {
   const [formData, setFormData] = useState({
     name: "",
     organizer: "",
     shortDescription: "",
     endDate: "",
-    image:"",
+    image: "",
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // Handle input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({
@@ -37,29 +43,24 @@ const CreateForm: React.FC<CreateFormProps> = ({ onClose, onCreateOpportunity })
     });
   };
 
-  // Validate form fields
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
     let isValid = true;
 
     const startWithLettersRegex = /^[A-Za-z]{2,}/;
 
-    // Required fields validation
     inputFields.forEach((field) => {
       const value = formData[field.name as keyof typeof formData];
 
-      // Check if the value is empty
       if (!value) {
         newErrors[field.name] = `${field.label} is required.`;
         isValid = false;
       } else if (field.name !== "endDate" && !startWithLettersRegex.test(value)) {
-        // Check if the value starts with at least two letters (except for endDate)
         newErrors[field.name] = `${field.label} must start with at least two letters.`;
         isValid = false;
       }
     });
 
-    // Organizer validation
     if (!formData.organizer) {
       newErrors["organizer"] = "Organizer is required.";
       isValid = false;
@@ -68,7 +69,6 @@ const CreateForm: React.FC<CreateFormProps> = ({ onClose, onCreateOpportunity })
       isValid = false;
     }
 
-    // End Date validation (should be a valid date)
     if (formData.endDate && isNaN(new Date(formData.endDate).getTime())) {
       newErrors["endDate"] = "End Date must be a valid date.";
       isValid = false;
@@ -78,12 +78,26 @@ const CreateForm: React.FC<CreateFormProps> = ({ onClose, onCreateOpportunity })
     return isValid;
   };
 
-  // Handle form submit
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
-      onCreateOpportunity(formData); // Pass the form data to the parent component
-      onClose(); // Close the modal after submitting the data
+    setSubmitError(null);
+
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500)); // Minimum loading time
+      onCreateOpportunity(formData);
+      onClose();
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error 
+          ? error.message 
+          : "Failed to create opportunity"
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -95,10 +109,24 @@ const CreateForm: React.FC<CreateFormProps> = ({ onClose, onCreateOpportunity })
             ✖
           </button>
 
-          <div className={styles.header}>Create Opportunity</div>
+          <div className={styles.header}>
+            Create Opportunity
+            {!isOnline && (
+              <div className={styles.offlineBadge}>
+                <FontAwesomeIcon icon={faCircleExclamation} />
+                <span>Working offline</span>
+              </div>
+            )}
+          </div>
+
+          {submitError && (
+            <div className={styles.submitError}>
+              <FontAwesomeIcon icon={faCircleExclamation} />
+              {submitError}
+            </div>
+          )}
 
           <form className={styles.formGrid} onSubmit={handleSubmit}>
-            {/* Organizer Field */}
             <div className={styles.inputGroup}>
               <div className={styles.label}>Organizer</div>
               <input
@@ -112,12 +140,11 @@ const CreateForm: React.FC<CreateFormProps> = ({ onClose, onCreateOpportunity })
               {errors.organizer && <div className={styles.errorText}>{errors.organizer}</div>}
             </div>
 
-            {/* Other Fields */}
             {inputFields.map((field, index) => (
               <div key={index} className={styles.inputGroup}>
                 <div className={styles.label}>{field.label}</div>
                 <input
-                  type={field.name === "endDate" ? "date" : "text"} // Use "date" input for endDate
+                  type={field.name === "endDate" ? "date" : "text"}
                   name={field.name}
                   value={formData[field.name as keyof typeof formData]}
                   onChange={handleInputChange}
@@ -127,13 +154,15 @@ const CreateForm: React.FC<CreateFormProps> = ({ onClose, onCreateOpportunity })
               </div>
             ))}
 
-            {/* Create Button */}
-            <button type="submit" className={styles.createButton}>
-              Create Opportunity
+            <button 
+              type="submit" 
+              className={styles.createButton}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Creating..." : "Create Opportunity"}
             </button>
           </form>
 
-          {/* Footer */}
           <div className={styles.footer}>
             <div className={styles.footerText}>Volunteering</div>
             <div className={styles.footerDot}>•</div>

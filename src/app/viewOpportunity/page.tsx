@@ -70,8 +70,7 @@ const ViewOpportunity = () => {
 
       const response = await opportunityService.uploadAttachment(
         id,
-        formData,
-        config
+        formData
       );
 
       // Add the new attachment to the list

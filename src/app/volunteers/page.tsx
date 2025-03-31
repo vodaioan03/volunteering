@@ -1,8 +1,8 @@
 "use client";
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import styles from "./Volunteers.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faStar, faSort, faPlus, faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import { faSearch, faStar, faSort, faPlus, faWifi, faServer } from "@fortawesome/free-solid-svg-icons";
 import CreateForm from "../createForm/page";
 import { useRouter } from "next/navigation";
 import Card from "@/components/cards/opportunitieCard/card";
@@ -15,39 +15,163 @@ const OpportunitiesPage = () => {
   const [sortedOpportunities, setSortedOpportunities] = useState<Opportunity[]>([]);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const opportunitiesPerPage = 10;
+  const [isFetching, setIsFetching] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [networkStatus, setNetworkStatus] = useState({
+    isOnline: true,
+    isServerAvailable: true
+  });
+  const [showLoading, setShowLoading] = useState(false);
+  
+  // Sliding window state
+  const [windowStart, setWindowStart] = useState(0);
+  const windowSize = 10;
+  const loadMoreThreshold = 5;
+  
+  const observer = useRef<IntersectionObserver | null>(null);
 
-  // Fetch opportunities on component mount
+  // Check network status periodically
+  useEffect(() => {
+    const checkStatus = async () => {
+      const newStatus = await opportunityService.checkNetworkStatus();
+      
+      // Only update state if status actually changed
+      if (newStatus.isOnline !== networkStatus.isOnline || 
+          newStatus.isServerAvailable !== networkStatus.isServerAvailable) {
+        setNetworkStatus(newStatus);
+        
+        // Only refresh if we've come back online
+        if ((newStatus.isOnline && newStatus.isServerAvailable) && 
+            (!networkStatus.isOnline || !networkStatus.isServerAvailable)) {
+          await opportunityService.syncOfflineOperations();
+          loadOpportunities(); // Refresh data after coming back online
+        }
+      }
+    };
+  
+    const interval = setInterval(checkStatus, 5000);
+    checkStatus(); // Initial check
+    
+    return () => clearInterval(interval);
+  }, [networkStatus]); // Add networkStatus as dependency
+
+  // Fetch initial opportunities
   const loadOpportunities = async () => {
     setLoading(true);
     setError(null);
     try {
       const data = await opportunityService.getAll();
       setOpportunities(data);
-      setSortedOpportunities(data); // Initialize sortedOpportunities
+      setSortedOpportunities(data.slice(0, windowSize));
+      setHasMore(data.length > windowSize);
+      
+      // Check if we're using cached data
+      const status = await opportunityService.checkNetworkStatus();
+      if (!status.isOnline || !status.isServerAvailable) {
+        // Optional: Show a subtle indicator that offline data is being shown
+        console.log('Showing cached opportunities data');
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load opportunities');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load opportunities';
+      setError(errorMessage);
+      
+      // Even if error occurs, try to show cached data
+      try {
+        const cachedData = opportunityService.getCachedData();
+        if (cachedData.length > 0) {
+          setOpportunities(cachedData);
+          setSortedOpportunities(cachedData.slice(0, windowSize));
+          setHasMore(cachedData.length > windowSize);
+          console.log('Fell back to cached data after error');
+        }
+      } catch (cacheError) {
+        console.error('Failed to load cached data:', cacheError);
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  // Load more opportunities when scrolling
+  const loadMoreOpportunities = useCallback(async () => {
+    if (isFetching || !hasMore) return;
+    
+    setIsFetching(true);
+    setShowLoading(true);
+    const minLoadTime = 500;
+
+    try {
+      await Promise.all([
+        new Promise(resolve => setTimeout(resolve, minLoadTime)),
+        (async () => {
+          const newWindowStart = windowStart + windowSize;
+          const newData = opportunities.slice(newWindowStart, newWindowStart + windowSize);
+          
+          if (newData.length === 0) {
+            setHasMore(false);
+            return;
+          }
+          
+          setSortedOpportunities(prev => [...prev, ...newData]);
+          setWindowStart(newWindowStart);
+        })()
+      ]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load more opportunities');
+    } finally {
+      setShowLoading(false);
+      setIsFetching(false);
+    }
+  }, [isFetching, hasMore, opportunities, windowStart, windowSize]);
+
+  // Observer callback
+  const lastItemRef = useCallback((node: HTMLDivElement) => {
+    if (isFetching) return;
+    
+    if (observer.current) {
+      observer.current.disconnect();
+    }
+
+    if (node) {
+      observer.current = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting && hasMore && !isFetching) {
+            loadMoreOpportunities();
+          }
+        },
+        { root: null, rootMargin: "20px", threshold: 0.1 }
+      );
+      observer.current.observe(node);
+    }
+  }, [isFetching, hasMore, loadMoreOpportunities]);
+
+  // Cleanup observer
+  useEffect(() => {
+    return () => {
+      if (observer.current) {
+        observer.current.disconnect();
+      }
+    };
+  }, []);
+
+  // Initial load
   useEffect(() => {
     loadOpportunities();
   }, []);
 
-  // Sort opportunities by endDate
+  // Sort opportunities
   const sortOpportunities = async () => {
     try {
       setLoading(true);
       const data = sortOrder === "asc" 
         ? await opportunityService.getAscending() 
         : await opportunityService.getDescending();
-      setSortedOpportunities(data);
-      setCurrentPage(1); // Reset to first page when sorting changes
+      setOpportunities(data);
+      setSortedOpportunities(data.slice(0, windowSize));
+      setWindowStart(0);
+      setHasMore(data.length > windowSize);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to sort opportunities');
     } finally {
@@ -77,13 +201,7 @@ const OpportunitiesPage = () => {
     setSortOrder(prev => prev === "asc" ? "desc" : "asc");
   };
 
-  // Pagination logic
-  const totalPages = Math.ceil(sortedOpportunities.length / opportunitiesPerPage);
-  const startIndex = (currentPage - 1) * opportunitiesPerPage;
-  const endIndex = startIndex + opportunitiesPerPage;
-  const currentOpportunities = sortedOpportunities.slice(startIndex, endIndex);
-
-  // Handle opportunity creation
+  // Handle opportunity creation with offline support
   const handleCreateOpportunity = async (formData: Record<string, string>) => {
     try {
       const newOpportunity: OpportunityCreate = {
@@ -95,7 +213,7 @@ const OpportunitiesPage = () => {
         endDate: formData.endDate,
       };
 
-      const createdOpportunity = await opportunityService.create(newOpportunity);
+      const createdOpportunity = await opportunityService.createWithOfflineSupport(newOpportunity);
       
       setOpportunities(prev => [...prev, {
         ...createdOpportunity,
@@ -117,18 +235,13 @@ const OpportunitiesPage = () => {
     router.push(`/viewOpportunity?id=${opp.id}`);
   };
 
-  // Get first/last ending opportunities
+  // Get first/last ending opportunities from the full sorted list
   const [firstEndingOpportunity, lastEndingOpportunity] = useMemo(() => {
-    if (sortedOpportunities.length === 0) return [null, null];
+    if (opportunities.length === 0) return [null, null];
     return sortOrder === "asc" 
-      ? [sortedOpportunities[0], sortedOpportunities[sortedOpportunities.length - 1]]
-      : [sortedOpportunities[sortedOpportunities.length - 1], sortedOpportunities[0]];
-  }, [sortedOpportunities, sortOrder]);
-
-  // Handle page change
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(Math.max(1, Math.min(newPage, totalPages)));
-  };
+      ? [opportunities[0], opportunities[opportunities.length - 1]]
+      : [opportunities[opportunities.length - 1], opportunities[0]];
+  }, [opportunities, sortOrder]);
 
   if (loading) return (
     <div className={styles.loading}>
@@ -151,6 +264,32 @@ const OpportunitiesPage = () => {
 
   return (
     <div className={styles.pageContainer}>
+      {/* Offline status banner */}
+      {(!networkStatus.isOnline || !networkStatus.isServerAvailable) && (
+        <div className={`
+          ${styles.offlineBanner}
+          ${!networkStatus.isOnline ? styles.networkOffline : ''}
+          ${networkStatus.isOnline && !networkStatus.isServerAvailable ? styles.serverOffline : ''}
+        `}>
+          {!networkStatus.isOnline ? (
+            <>
+              <FontAwesomeIcon icon={faWifi} />
+              <span>You're offline. Changes will be synced when you reconnect.</span>
+            </>
+          ) : (
+            <>
+              <FontAwesomeIcon icon={faServer} />
+              <span>Server unavailable. Working in offline mode.</span>
+            </>
+          )}
+          {opportunityService.getPendingOperationsCount() > 0 && (
+            <span className={styles.pendingChanges}>
+              {opportunityService.getPendingOperationsCount()} pending changes
+            </span>
+          )}
+        </div>
+      )}
+
       {/* Sidebar */}
       <div className={styles.sideBar}>
         <div className={styles.sideBarList}>
@@ -203,21 +342,23 @@ const OpportunitiesPage = () => {
           </div>
         </div>
         
-        {/* Opportunity Cards */}
         <div className={styles.listLayoutCards}>
-          {currentOpportunities.map((opp, index) => {
+          {sortedOpportunities.map((opp, index) => {
             const isFirstEnding = opp.id === firstEndingOpportunity?.id;
             const isLastEnding = opp.id === lastEndingOpportunity?.id;
+            const isLastItem = index === sortedOpportunities.length - 1;
 
             return (
               <div 
                 key={`${opp.id}-${index}`}
+                ref={isLastItem ? lastItemRef : null}
                 onClick={() => handleOpportunityClick(opp)}
                 style={{
                   border: isFirstEnding ? "2px solid green" :
                          isLastEnding ? "2px solid red" :
                          "1px solid #ccc",
-                  cursor: "pointer"
+                  cursor: "pointer",
+                  minHeight: "200px"
                 }}
               >
                 <Card
@@ -227,34 +368,24 @@ const OpportunitiesPage = () => {
                   organizer={opp.organizer}
                   views={opp.views}
                   endDate={opp.endDate}
+                  isOffline={!!opp.isOffline}
                 />
               </div>
             );
           })}
         </div>
         
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className={styles.paginationContainer}>
-            <button
-              className={styles.paginationButton}
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              <FontAwesomeIcon icon={faArrowLeft} />
-            </button>
-            
-            <span className={styles.paginationText}>
-              Page {currentPage} of {totalPages}
-            </span>
-            
-            <button
-              className={styles.paginationButton}
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              <FontAwesomeIcon icon={faArrowRight} />
-            </button>
+        {/* Loading indicators */}
+        {(showLoading || isFetching) && (
+          <div className={styles.loadingMore}>
+            <div className={styles.spinner}></div>
+            Loading more opportunities...
+          </div>
+        )}
+        
+        {!hasMore && !loading && (
+          <div className={styles.endOfResults}>
+            You've reached the end of the list
           </div>
         )}
       </div>
@@ -264,6 +395,7 @@ const OpportunitiesPage = () => {
         <CreateForm
           onClose={() => setIsCreateFormOpen(false)}
           onCreateOpportunity={handleCreateOpportunity}
+          isOnline={networkStatus.isOnline && networkStatus.isServerAvailable}
         />
       )}
     </div>
