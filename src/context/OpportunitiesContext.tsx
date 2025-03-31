@@ -1,15 +1,6 @@
 "use client";
 import { createContext, useContext, useState, ReactNode } from "react";
-
-export interface Opportunity {
-  title: string;
-  organizer: string;
-  shortDescription: string;
-  description: string;
-  image: string;
-  views: string;
-  endDate: string;
-}
+import {Opportunity } from "@/types/opportunity";
 
 interface OpportunitiesContextType {
   opportunities: Opportunity[];

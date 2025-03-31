@@ -7,6 +7,7 @@ import styles from "./Card.module.css";
 import { useRouter } from "next/navigation"; // Import useRouter
 
 export interface CardProps {
+    id?:string;
     image: string;
     name: string;
     organizer: string;
@@ -16,18 +17,12 @@ export interface CardProps {
     description?: string; // Optional: Add if needed
 }
 
-const Card: React.FC<CardProps> = ({ image, name, organizer, views, endDate, shortDescription = "", description = "" }) => {
+const Card: React.FC<CardProps> = ({ id, image, name, organizer, views, endDate, shortDescription = "", description = "" }) => {
     const router = useRouter(); // Initialize the router
 
     // Handle card click
     const handleCardClick = () => {
-        router.push(
-            `/viewOpportunity?title=${encodeURIComponent(name)}&organizer=${encodeURIComponent(
-                organizer
-            )}&shortdesc=${encodeURIComponent(shortDescription)}&description=${encodeURIComponent(
-                description
-            )}&image=${encodeURIComponent(image)}`
-        );
+        router.push(`/viewOpportunity?id=${id}`);
     };
 
     return (

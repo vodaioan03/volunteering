@@ -1,0 +1,225 @@
+/* Contact Hero Section */
+.contactHero {
+    padding: 8rem 0;
+    background: linear-gradient(45deg, #3b82f6, #6366f1);
+    color: #ffffff;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  
+  .contactHeroContainer {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    position: relative;
+    z-index: 10;
+  }
+  
+  .contactHeroContent {
+    max-width: 48rem;
+    margin: 0 auto;
+    text-align: center;
+  }
+  
+  .contactHeroTitle {
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+  }
+  
+  @media (min-width: 768px) {
+    .contactHeroTitle {
+      font-size: 4rem;
+    }
+  }
+  
+  .contactHeroSubtitle {
+    font-size: 1.25rem;
+    opacity: 0.9;
+    margin-bottom: 2rem;
+  }
+  
+  /* Contact Form Section */
+  .contactSection {
+    padding: 6rem 0;
+    background: #ffffff;
+    position: relative;
+  }
+  
+  .contactContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3rem;
+  }
+  
+  .contactInfo {
+    flex: 1 1 40%;
+  }
+  
+  .contactFormContainer {
+    flex: 1 1 50%;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    padding: 2.5rem;
+  }
+  
+  .contactFormTitle {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 1.5rem;
+  }
+  
+  .formGroup {
+    margin-bottom: 1.5rem;
+  }
+  
+  .formLabel {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+  }
+  
+  .formInput,
+  .formTextarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .formInput:focus,
+  .formTextarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+  
+  .formTextarea {
+    min-height: 150px;
+    resize: vertical;
+  }
+  
+  .contactInfoCard {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    transition: all 0.3s ease;
+  }
+  
+  .contactInfoCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+  }
+  
+  .contactInfoTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .contactInfoText {
+    font-size: 1rem;
+    color: #4a5568;
+    line-height: 1.6;
+    margin-left: 2rem;
+  }
+  
+  /* Map Section */
+  .mapSection {
+    padding: 0 0 6rem;
+    background: linear-gradient(45deg, #f9fafb, #ffffff);
+  }
+  
+  .mapContainer {
+    height: 400px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Decorative Elements */
+  .decorativeCircle {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .decorativeCircleTop {
+    width: 16rem;
+    height: 16rem;
+    top: -8rem;
+    right: -8rem;
+  }
+  
+  .decorativeCircleBottom {
+    width: 20rem;
+    height: 20rem;
+    bottom: -10rem;
+    left: -10rem;
+  }
+  
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+
+.ctaButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 9999px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .ctaButtonPrimary {
+    background: #ffffff;
+    color: #3b82f6;
+  }
+  
+  .ctaButtonPrimary:hover {
+    background: #3b82f6;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .ctaButtonOutline {
+    background: transparent;
+    border: 2px solid #ffffff;
+    color: #ffffff;
+  }
+  
+  .ctaButtonOutline:hover {
+    background: #ffffff;
+    color: #3b82f6;
+    transform: translateY(-2px);
+  }
+  

@@ -37,7 +37,7 @@ const Index = () => {
 
       {/* Programs Section with White Background */}
       <section className={`${styles.programsSection} ${styles.relative}`}>
-  <div className={styles.containerCustom}>
+  <div className={styles.containerCustomHome}>
     <div className={`${styles.textCenter} ${styles.mb16}`}>
       <span className={styles.titleChip}>Our Programs</span>
       <h2 className={styles.sectionTitle}>How You Can Participate</h2>
@@ -108,7 +108,7 @@ const Index = () => {
 
       {/* Impact Statistics Section */}
       <section className={styles.impactSection}>
-  <div className={styles.containerCustom}>
+  <div className={styles.containerCustomHome}>
     <div className={`${styles.textCenter} ${styles.mb16}`}>
       <span className={styles.titleChip}>Our Impact</span>
       <h2 className={styles.sectionTitle}>Making a Difference Together</h2>
@@ -147,7 +147,7 @@ const Index = () => {
 
       {/* Featured Opportunities Section */}
       <section className={`${styles.featuredSection} ${styles.relative} ${styles.overflowHidden}`}>
-  <div className={`${styles.containerCustom} ${styles.relative} ${styles.z10}`}>
+  <div className={`${styles.containerCustomHome} ${styles.relative} ${styles.z10}`}>
     <div className={`${styles.textCenter} ${styles.mb16}`}>
       <span className={styles.titleChip}>Get Involved</span>
       <h2 className={styles.sectionTitle}>Featured Opportunities</h2>
@@ -259,7 +259,7 @@ const Index = () => {
 
       {/* Testimonials Section */}
       <section className={styles.testimonialsSection}>
-  <div className={styles.containerCustom}>
+  <div className={styles.containerCustomHome}>
     <div className={`${styles.textCenter} ${styles.mb16}`}>
       <span className={styles.titleChip}>Testimonials</span>
       <h2 className={styles.sectionTitle}>From Our Community</h2>

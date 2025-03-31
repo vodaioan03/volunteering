@@ -10,11 +10,20 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBell, faGear } from "@fortawesome/free-solid-svg-icons";
 
 const Header = () => {
+  const Links = [
+    {name:"Home Page",href:"/"},
+    {name:"Opportunities",href:"/volunteers"},
+    {name:"Analytics",href:"/analytics"},
+    {name:"About",href:"/aboutUs"},
+    {name:"Contact",href:"/contact"},
+  ]
   // State to track the active link
-  const [activeLink, setActiveLink] = useState<string>("home");
+  const [activeLink, setActiveLink] = useState<string>(Links[0].name);
   // State to track which modal is shown
   const [modalType, setModalType] = useState<"login" | "register" | null>(null);
 
+  // This are 
+  
   return (
     <header className={styles.header}>
       {/* Left Section */}
@@ -26,47 +35,25 @@ const Header = () => {
             width={38}
             height={38}
             className={styles.logo}
+            onClick={() => setActiveLink(Links[0].name)}
           />
         </Link>
       </div>
 
       {/* Navigation */}
       <nav className={styles.navigation}>
-        <Link
-          href="/"
-          className={`${styles.navPill} ${activeLink === "home" ? styles.active : ""}`}
-          onClick={() => setActiveLink("home")}
-        >
-          Home Page
-        </Link>
-        <Link
-          href="/volunteers"
-          className={`${styles.navPill} ${activeLink === "opportunities" ? styles.active : ""}`}
-          onClick={() => setActiveLink("opportunities")}
-        >
-          Opportunities
-        </Link>
-        <Link
-          href="/analytics"
-          className={`${styles.navPill} ${activeLink === "analytics" ? styles.active : ""}`}
-          onClick={() => setActiveLink("analytics")}
-        >
-          Analytics
-        </Link>
-        <Link
-          href="/about"
-          className={`${styles.navPill} ${activeLink === "about" ? styles.active : ""}`}
-          onClick={() => setActiveLink("about")}
-        >
-          About
-        </Link>
-        <Link
-          href="/contact"
-          className={`${styles.navPill} ${activeLink === "contact" ? styles.active : ""}`}
-          onClick={() => setActiveLink("contact")}
-        >
-          Contact
-        </Link>
+        {Links.map((linkObj,index) => {
+          return (
+            <Link
+              key={index}
+              href={linkObj.href}
+              className={`${styles.navPill} ${activeLink === linkObj.name ? styles.active : ""}`}
+              onClick={() => setActiveLink(linkObj.name)}
+            >
+              {linkObj.name}
+            </Link>
+          );
+        })}
       </nav>
 
       {/* Right Section */}
