@@ -8,15 +8,18 @@ import { opportunityService } from "@/services/opportunities";
 import UpdateForm from "../updateForm/page";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faTrash, faCalendar, faUsers, faInfoCircle, faPaperclip, faDownload } from "@fortawesome/free-solid-svg-icons";
+import { useError } from "@/context/ErrorContext";
+import { useAuth } from "@/context/AuthContext";
 
 const ViewOpportunity = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { showError } = useError();
+  const { isAuthenticated } = useAuth();
   const id = searchParams.get("id") || "";
   
   const [opportunity, setOpportunity] = useState<Opportunity | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -33,8 +36,12 @@ const ViewOpportunity = () => {
         // Fetch attachments if your API supports it
         const attachmentsData = await opportunityService.getAttachments(id);
         setAttachments(attachmentsData);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load opportunity');
+      } catch (error) {
+        if (error instanceof Error) {
+          showError(error.message);
+        } else {
+          showError('Failed to load opportunity');
+        }
       } finally {
         setLoading(false);
       }
@@ -43,7 +50,7 @@ const ViewOpportunity = () => {
     if (id) {
       fetchData();
     }
-  }, [id]);
+  }, [id, showError]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -74,7 +81,7 @@ const ViewOpportunity = () => {
         fileInputRef.current.value = "";
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to upload file');
+      showError(err instanceof Error ? err.message : 'Failed to upload file');
     }
   };
 
@@ -91,20 +98,31 @@ const ViewOpportunity = () => {
       link.click();
       document.body.removeChild(link);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to download file');
+      showError(err instanceof Error ? err.message : 'Failed to download file');
     }
   };
 
+  const handleUpdateClick = () => {
+    if (!isAuthenticated) {
+      showError("Please log in to update opportunities");
+      return;
+    }
+    setShowUpdateModal(true);
+  };
+
   const handleDelete = async () => {
+    if (!isAuthenticated) {
+      showError("Please log in to delete opportunities");
+      return;
+    }
+
     const confirmDelete = window.confirm("Are you sure you want to delete this opportunity?");
     if (confirmDelete) {
       try {
         await opportunityService.delete(id);
-        
         router.push("/volunteers");
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to delete opportunity');
-        console.error("Delete error:", err);
+        showError(err instanceof Error ? err.message : 'Failed to delete opportunity');
       }
     }
   };
@@ -124,14 +142,17 @@ const ViewOpportunity = () => {
       );
       setOpportunity(updatedOpportunity);
       setShowUpdateModal(false);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update opportunity');
+    } catch (error) {
+      if (error instanceof Error) {
+        showError(error.message);
+      } else {
+        showError('Failed to update opportunity');
+      }
     }
   };
 
   if (loading) return <div className={styles.loading}>Loading...</div>;
-  if (error) return <div className={styles.error}>Error: {error}</div>;
-  if (!opportunity) return <div className={styles.error}>Opportunity not found</div>;
+  if (!opportunity) return <div className={styles.notFound}>Opportunity not found</div>;
 
   return (
     <div className={styles.container}>
@@ -155,13 +176,13 @@ const ViewOpportunity = () => {
         <p className={styles.headerDescription}>{opportunity.shortDescription}</p>
         <div className={styles.headerButtons}>
           <button
-            className={`${styles.headerButton} ${styles.headerButtonUpdate}`}
-            onClick={() => setShowUpdateModal(true)}
+            className={`${styles.headerButton} ${styles.headerButtonUpdate} ${!isAuthenticated ? styles.headerButtonDisabled : ''}`}
+            onClick={handleUpdateClick}
           >
             Update
           </button>
           <button
-            className={`${styles.headerButton} ${styles.headerButtonDelete}`}
+            className={`${styles.headerButton} ${styles.headerButtonDelete} ${!isAuthenticated ? styles.headerButtonDisabled : ''}`}
             onClick={handleDelete}
           >
             Delete

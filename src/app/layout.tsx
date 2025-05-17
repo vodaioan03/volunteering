@@ -5,6 +5,7 @@ import Footer from "../components/footer/footer";
 import Header from "../components/header/header";
 import { OpportunitiesProvider } from "@/context/OpportunitiesContext";
 import { AuthProvider } from '@/context/AuthContext';
+import { ErrorProvider } from '@/context/ErrorContext';
 
 /* Font awesome icons imports*/
 import { config } from '@fortawesome/fontawesome-svg-core'
@@ -47,13 +48,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${roboto.variable} antialiased`}
       >
-        <AuthProvider>
-          <Header />
-          <OpportunitiesProvider>
-            {children}
-          </OpportunitiesProvider>
-          <Footer />
-        </AuthProvider>
+        <ErrorProvider>
+          <AuthProvider>
+            <Header />
+            <OpportunitiesProvider>
+              {children}
+            </OpportunitiesProvider>
+            <Footer />
+          </AuthProvider>
+        </ErrorProvider>
       </body>
     </html>
   );

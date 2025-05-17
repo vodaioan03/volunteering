@@ -8,15 +8,17 @@ import { useRouter } from "next/navigation";
 import Card from "@/components/cards/opportunitieCard/card";
 import { opportunityService } from "@/services/opportunities";
 import type { Opportunity, OpportunityCreate } from "@/types/opportunity";
-
+import { useError } from "@/context/ErrorContext";
+import { useAuth } from "@/context/AuthContext";
 
 const OpportunitiesPage = () => {
   const router = useRouter();
+  const { showError } = useError();
+  const { isAuthenticated } = useAuth();
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [isFetching, setIsFetching] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [networkStatus, setNetworkStatus] = useState({
@@ -26,47 +28,26 @@ const OpportunitiesPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   
   const observer = useRef<IntersectionObserver | null>(null);
-  const PAGE_SIZE = 10
-  // Check network status periodically
-  useEffect(() => {
-    const checkStatus = async () => {
-      const newStatus = await opportunityService.checkNetworkStatus();
-      
-      if (newStatus.isOnline !== networkStatus.isOnline || 
-          newStatus.isServerAvailable !== networkStatus.isServerAvailable) {
-        setNetworkStatus(newStatus);
-        
-        if ((newStatus.isOnline && newStatus.isServerAvailable) && 
-            (!networkStatus.isOnline || !networkStatus.isServerAvailable)) {
-          await opportunityService.syncOfflineOperations();
-          loadInitialData(); // Refresh data after coming back online
-        }
-      }
-    };
-  
-    const interval = setInterval(checkStatus, 5000);
-    checkStatus(); // Initial check
-    
-    return () => clearInterval(interval);
-  }, [networkStatus]);
+  const PAGE_SIZE = 10;
 
-  // Load initial data (featured + first page)
+  // Initial data loading
   const loadInitialData = async () => {
     setLoading(true);
-    setError(null);
     try {
       const { data, total } = await opportunityService.getPaginated(1, PAGE_SIZE);
+      setOpportunities(data);
+      setHasMore(data.length < total);
+      setCurrentPage(1);
       
-      if (Array.isArray(data)) {
-        setOpportunities(data);
-        setHasMore(total > data.length);
-        setCurrentPage(1);
+      // Check network status
+      const status = await opportunityService.checkNetworkStatus();
+      setNetworkStatus(status);
+    } catch (error) {
+      if (error instanceof Error) {
+        showError(error.message);
       } else {
-        throw new Error('Received invalid data format');
+        showError('Failed to load opportunities');
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load opportunities';
-      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -74,11 +55,7 @@ const OpportunitiesPage = () => {
 
   // Load more opportunities when scrolling
   const loadMoreOpportunities = useCallback(async () => {
-    console.log('Attempting to load more...');
-    console.log('Current state:', { isFetching, hasMore, currentPage });
-    
     if (isFetching || !hasMore) {
-      console.log('Aborting - already fetching or no more items');
       return;
     }
     
@@ -88,7 +65,6 @@ const OpportunitiesPage = () => {
       const { data, total } = await opportunityService.getPaginated(nextPage, PAGE_SIZE);
       
       setOpportunities(prev => {
-        // Filter out duplicates just in case
         const newItems = data.filter(newItem => 
           !prev.some(existingItem => existingItem.id === newItem.id)
         );
@@ -97,12 +73,16 @@ const OpportunitiesPage = () => {
       
       setHasMore((nextPage * PAGE_SIZE) < total);
       setCurrentPage(nextPage);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load more opportunities');
+    } catch (error) {
+      if (error instanceof Error) {
+        showError(error.message);
+      } else {
+        showError('Failed to load more opportunities');
+      }
     } finally {
       setIsFetching(false);
     }
-  }, [isFetching, hasMore, currentPage]);
+  }, [isFetching, hasMore, currentPage, showError]);
 
   // Observer callback for infinite scroll
   const lastItemRef = useCallback((node: HTMLDivElement) => {
@@ -117,7 +97,7 @@ const OpportunitiesPage = () => {
             loadMoreOpportunities();
           }
         },
-        { root: null, rootMargin: "100px", threshold: 0.1 } // Increased margin
+        { root: null, rootMargin: "100px", threshold: 0.1 }
       );
       observer.current.observe(node);
     }
@@ -152,7 +132,6 @@ const OpportunitiesPage = () => {
         : await opportunityService.getDescending();
       
       if (Array.isArray(allData)) {
-        // Keep existing loaded items if they match the current sort
         const sortedData = [...allData].sort((a, b) => 
           sortOrder === "asc" 
             ? new Date(a.endDate).getTime() - new Date(b.endDate).getTime()
@@ -162,8 +141,12 @@ const OpportunitiesPage = () => {
         setOpportunities(sortedData.slice(0, currentPage * PAGE_SIZE));
         setHasMore(sortedData.length > currentPage * PAGE_SIZE);
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to sort opportunities');
+    } catch (error) {
+      if (error instanceof Error) {
+        showError(error.message);
+      } else {
+        showError('Failed to sort opportunities');
+      }
     } finally {
       setLoading(false);
     }
@@ -186,8 +169,10 @@ const OpportunitiesPage = () => {
   const toggleSortOrder = () => {
     const newOrder = sortOrder === "asc" ? "desc" : "asc";
     setSortOrder(newOrder);
-    sortOpportunities(); // Actually trigger the sort
-  };
+    sortOpportunities();
+  };   
+
+  
 
   // Handle opportunity creation
   const handleCreateOpportunity = async (formData: Record<string, string>) => {
@@ -202,14 +187,14 @@ const OpportunitiesPage = () => {
       };
 
       const createdOpportunity = await opportunityService.createWithOfflineSupport(newOpportunity);
-      
-      // Refresh data after creation
       await loadInitialData();
       setIsCreateFormOpen(false);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to create opportunity';
-      setError(message);
-      console.error('Creation error:', err);
+    } catch (error) {
+      if (error instanceof Error) {
+        showError(error.message);
+      } else {
+        showError('Failed to create opportunity');
+      }
     }
   };
 
@@ -221,20 +206,19 @@ const OpportunitiesPage = () => {
       : [opportunities[opportunities.length - 1], opportunities[0]];
   }, [opportunities, sortOrder]);
 
+  // Handle add button click with auth check
+  const handleAddButtonClick = () => {
+    if (!isAuthenticated) {
+      showError("Please log in to create an opportunity");
+      return;
+    }
+    setIsCreateFormOpen(true);
+  };
+
   if (loading) return <div className={styles.loading}>Loading opportunities...</div>;
-  
-  if (error) return (
-    <div className={styles.error}>
-      <div className={styles.errorIcon}>⚠️</div>
-      Error: {error}
-      <button className={styles.retryButton} onClick={loadInitialData}>
-        Retry
-      </button>
-    </div>
-  );
 
   return (
-    <div className={styles.pageContainer}>
+    <div className={styles.container}>
       {/* Offline status banner */}
       {(!networkStatus.isOnline || !networkStatus.isServerAvailable) && (
         <div className={`
@@ -304,8 +288,8 @@ const OpportunitiesPage = () => {
           
           <div className={styles.addButtonContainer}>
             <button 
-              className={styles.addButton} 
-              onClick={() => setIsCreateFormOpen(true)}
+              className={`${styles.addButton} ${!isAuthenticated ? styles.addButtonDisabled : ''}`}
+              onClick={handleAddButtonClick}
             >
               <FontAwesomeIcon icon={faPlus} className={styles.addButtonIcon} />
               Add Opportunity

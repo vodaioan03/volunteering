@@ -8,8 +8,20 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8
 const LOCAL_STORAGE_KEY = 'offline_opportunities_data';
 
 class OpportunityService {
+  private getErrorMessage(error: unknown): string {
+    if (error instanceof Error) {
+      if (error.message === 'UNAUTHORIZED') {
+        return 'Please log in to access this feature';
+      }
+      if (error.message === 'OFFLINE_MODE') {
+        return 'You are currently offline. Some features may be limited.';
+      }
+      return error.message;
+    }
+    return 'An unexpected error occurred';
+  }
+
   // Helper function with proper async/await handling
-  // Add request throttling to your service
   private async makeRequest<T>(endpoint: string, method: string = 'GET', body?: object): Promise<T> {
     const { isOnline } = networkService.getStatus();
     
@@ -668,3 +680,4 @@ public async withdrawApplication(opportunityId: string, userId: string): Promise
 
 }
 export const opportunityService = new OpportunityService();
+export { OpportunityService }; // Export the class for type usage

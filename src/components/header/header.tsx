@@ -1,10 +1,10 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./Header.module.css";
 import Image from "next/image";
 import Logo from "../../utils/images/logo.png";
 import Link from "next/link";
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from "@/context/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBell, faUser, faSignOut } from "@fortawesome/free-solid-svg-icons";
@@ -20,10 +20,17 @@ const Header = () => {
   ];
 
   const router = useRouter();
+  const pathname = usePathname();
   const { user, isAuthenticated, isLoading, logout } = useAuth();
-  const [activeLink, setActiveLink] = useState<string>(Links[0].name);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+
+  const isLinkActive = (href: string) => {
+    if (href === '/') {
+      return pathname === href;
+    }
+    return pathname?.startsWith(href);
+  };
 
   const handleLogout = () => {
     logout();
@@ -52,7 +59,6 @@ const Header = () => {
             width={38}
             height={38}
             className={styles.logo}
-            onClick={() => setActiveLink(Links[0].name)}
           />
         </Link>
       </div>
@@ -64,8 +70,7 @@ const Header = () => {
             <Link
               key={index}
               href={linkObj.href}
-              className={`${styles.navPill} ${activeLink === linkObj.name ? styles.active : ""}`}
-              onClick={() => setActiveLink(linkObj.name)}
+              className={`${styles.navPill} ${isLinkActive(linkObj.href) ? styles.active : ""}`}
             >
               {linkObj.name}
             </Link>
