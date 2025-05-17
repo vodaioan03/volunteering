@@ -2,41 +2,79 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { authService } from '@/services/authService';
+import { User } from '@/types/auth';
 
 interface AuthContextType {
-  user: any;
-  userId: string | null;
+  user: User | null;
+  isAuthenticated: boolean;
   isLoading: boolean;
+  logout: () => void;
+  setUser: (user: User | null) => void;
+  setIsAuthenticated: (value: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
-  userId: null,
+  isAuthenticated: false,
   isLoading: true,
+  logout: () => {},
+  setUser: () => {},
+  setIsAuthenticated: () => {}
 });
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<any>(null);
+export const useAuth = () => useContext(AuthContext);
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for user in localStorage
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
-    setIsLoading(false);
+    const initializeAuth = async () => {
+      try {
+        if (authService.isTokenValid()) {
+          const currentUser = authService.getCurrentUser();
+          if (currentUser) {
+            setUser(currentUser);
+            setIsAuthenticated(true);
+          } else {
+            // If we have a valid token but no user data, clear everything
+            authService.logout();
+          }
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        authService.logout();
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeAuth();
   }, []);
 
+  const logout = () => {
+    authService.logout();
+    setUser(null);
+    setIsAuthenticated(false);
+  };
+
+  // Don't render children until authentication is initialized
+  if (isLoading) {
+    return null; // Or return a loading spinner/placeholder
+  }
+
   return (
-    <AuthContext.Provider value={{
-      user,
-      userId: user?.id || null,
+    <AuthContext.Provider value={{ 
+      user, 
+      isAuthenticated,
       isLoading,
+      logout,
+      setUser,
+      setIsAuthenticated 
     }}>
       {children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = () => useContext(AuthContext);
+}

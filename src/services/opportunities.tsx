@@ -2,49 +2,74 @@
 import { Opportunity, OpportunityCreate, OpportunityUpdate } from "@/types/opportunity";
 import { networkService } from "../services/network";
 import { offlineQueue } from "./offlineQueue";
+import { authService } from "./authService";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://192.168.1.150:8080/api/opportunities';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api/opportunities';
 const LOCAL_STORAGE_KEY = 'offline_opportunities_data';
 
 class OpportunityService {
   // Helper function with proper async/await handling
   // Add request throttling to your service
-private async makeRequest<T>(endpoint: string, method: string = 'GET', body?: object): Promise<T> {
-  // Add delay between requests
-  await new Promise(resolve => setTimeout(resolve, 300)); // 300ms delay
-  
-  try {
-    const options: RequestInit = {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    };
-
-    if (body) {
-      options.body = JSON.stringify(body);
-    }
-
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+  private async makeRequest<T>(endpoint: string, method: string = 'GET', body?: object): Promise<T> {
+    const { isOnline } = networkService.getStatus();
     
-    if (response.status === 429) {
-      // Handle rate limiting - wait and retry
-      const retryAfter = parseInt(response.headers.get('Retry-After') || "5");
-      await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
-      return this.makeRequest(endpoint, method, body);
+    if (!isOnline) {
+      throw new Error('OFFLINE_MODE');
     }
 
-    if (!response.ok) {
-      throw new Error(`Request failed with status ${response.status}`);
-    }
+    try {
+      const token = authService.getToken();
+      const options: RequestInit = {
+        method,
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : '',
+        },
+        credentials: 'same-origin',
+        mode: 'cors'
+      };
 
-    const text = await response.text();
-    return text ? JSON.parse(text) as T : undefined as unknown as T;
-  } catch (error) {
-    console.error('Request error:', error);
-    throw error;
+      if (body) {
+        options.body = JSON.stringify(body);
+      }
+
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+      
+      if (response.status === 429) {
+        // Handle rate limiting - wait and retry
+        const retryAfter = parseInt(response.headers.get('Retry-After') || "5");
+        await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
+        return this.makeRequest(endpoint, method, body);
+      }
+
+      if (!response.ok) {
+        if (response.status === 404 || response.status === 503) {
+          throw new Error('OFFLINE_MODE');
+        }
+        if (response.status === 403 || response.status === 401) {
+          throw new Error('UNAUTHORIZED');
+        }
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+
+      const text = await response.text();
+      return text ? JSON.parse(text) as T : undefined as unknown as T;
+    } catch (error: unknown) {
+      console.error('Request error:', error);
+      if (error instanceof Error) {
+        if (error.message === 'UNAUTHORIZED') {
+          throw error; // Re-throw authentication errors
+        }
+        if (error.message === 'Failed to fetch' || 
+            error.message.includes('NetworkError') ||
+            error.message.includes('CORS')) {
+          throw new Error('OFFLINE_MODE');
+        }
+      }
+      throw error;
+    }
   }
-}
 
   // Get paginated data with proper async handling
   public async getPaginated(page: number = 1, pageSize: number = 10): Promise<{ 
@@ -63,7 +88,13 @@ private async makeRequest<T>(endpoint: string, method: string = 'GET', body?: ob
       
       this.cachePage(page, response.data);
       return response;
-    } catch (error) {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message === 'UNAUTHORIZED') {
+        return {
+          data: [],
+          total: 0
+        };
+      }
       console.error('Failed to get paginated data:', error);
       const allCached = this.getCachedData();
       return {
@@ -87,7 +118,7 @@ private async makeRequest<T>(endpoint: string, method: string = 'GET', body?: ob
           JSON.stringify([...cachedPages, page])
         );
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Failed to cache page:', error);
     }
   }
@@ -114,7 +145,7 @@ private async makeRequest<T>(endpoint: string, method: string = 'GET', body?: ob
       });
       
       return allData;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Failed to get cached data:', error);
       return [];
     }
@@ -123,9 +154,9 @@ private async makeRequest<T>(endpoint: string, method: string = 'GET', body?: ob
   // Get featured opportunities with proper async handling
   public async getFeaturedOpportunities(): Promise<Opportunity[]> {
     try {
-      const { isOnline, isServerAvailable } = networkService.getStatus();
+      const { isOnline } = networkService.getStatus();
       
-      if (isOnline && isServerAvailable) {
+      if (isOnline) {
         const featured = await this.makeRequest<Opportunity[]>('/featured');
         // Cache featured opportunities separately for quick access
         localStorage.setItem(`${LOCAL_STORAGE_KEY}_featured`, JSON.stringify(featured));
@@ -139,7 +170,10 @@ private async makeRequest<T>(endpoint: string, method: string = 'GET', body?: ob
         // Fallback to first 2 from full cache
         return this.getCachedData().slice(0, 2);
       }
-    } catch (error) {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message === 'UNAUTHORIZED') {
+        return [];
+      }
       console.error('Failed to get featured opportunities:', error);
       // Fallback strategies
       const cachedFeatured = localStorage.getItem(`${LOCAL_STORAGE_KEY}_featured`);
@@ -170,9 +204,9 @@ private async makeRequest<T>(endpoint: string, method: string = 'GET', body?: ob
 
 
   public async createWithOfflineSupport(data: OpportunityCreate): Promise<Opportunity> {
-    const { isOnline, isServerAvailable } = networkService.getStatus();
+    const { isOnline } = networkService.getStatus();
     
-    if (isOnline && isServerAvailable) {
+    if (isOnline) {
       try {
         return await this.create(data);
       } catch (error) {
@@ -265,13 +299,13 @@ public getCachedPage(page: number): Opportunity[] {
       this.cacheData(response.data);
       return response.data;
     } catch (error) {
-      if (error.message === 'OFFLINE_MODE') {
+      if (error instanceof Error && error.message === 'OFFLINE_MODE') {
         const cached = this.getCachedData();
         return cached.sort((a, b) => 
           new Date(a.endDate).getTime() - new Date(b.endDate).getTime()
         );
       }
-      throw error;
+      throw error instanceof Error ? error : new Error('Failed to get ascending opportunities');
     }
   }
   
@@ -482,9 +516,9 @@ public getCachedPage(page: number): Opportunity[] {
 // Enhanced application methods
 public async checkCanApply(opportunityId: string, userId: string): Promise<{ canApply: boolean, reason?: string }> {
   try {
-    const { isOnline, isServerAvailable } = networkService.getStatus();
+    const { isOnline } = networkService.getStatus();
     
-    if (!isOnline || !isServerAvailable) {
+    if (!isOnline) {
       // Check local cache for existing application
       const cachedApplications = this.getCachedApplications();
       const hasApplied = cachedApplications.some(app => 
@@ -513,7 +547,7 @@ public async checkCanApply(opportunityId: string, userId: string): Promise<{ can
 }
 
 public async applyForOpportunity(opportunityId: string, userId: string): Promise<Application> {
-  const { isOnline, isServerAvailable } = networkService.getStatus();
+  const { isOnline } = networkService.getStatus();
   
   const applicationData = {
     opportunityId,
@@ -522,7 +556,7 @@ public async applyForOpportunity(opportunityId: string, userId: string): Promise
     status: "PENDING"
   };
 
-  if (isOnline && isServerAvailable) {
+  if (isOnline) {
     try {
       const result = await this.makeRequest<Application>(
         `/apply/${opportunityId}`,
@@ -598,9 +632,9 @@ public async getApplicationStatus(opportunityId: string, userId: string): Promis
 }
 
 public async withdrawApplication(opportunityId: string, userId: string): Promise<void> {
-  const { isOnline, isServerAvailable } = networkService.getStatus();
+  const { isOnline } = networkService.getStatus();
   
-  if (isOnline && isServerAvailable) {
+  if (isOnline) {
     try {
       await this.makeRequest(
         `/withdraw-application/${opportunityId}`,

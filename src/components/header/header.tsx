@@ -4,10 +4,11 @@ import styles from "./Header.module.css";
 import Image from "next/image";
 import Logo from "../../utils/images/logo.png";
 import Link from "next/link";
-import SigninPage from "@/app/signIn/page"; // Assuming this is your login component
-import RegisterPage from "@/app/register/page"; // Assuming you have a register page
+import { useRouter } from 'next/navigation';
+import { useAuth } from "@/context/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBell, faGear } from "@fortawesome/free-solid-svg-icons";
+import { faBell, faUser, faSignOut } from "@fortawesome/free-solid-svg-icons";
+import RegisterPage from "@/app/register/page";
 
 const Header = () => {
   const Links = [
@@ -16,13 +17,29 @@ const Header = () => {
     {name:"Analytics",href:"/analytics"},
     {name:"About",href:"/aboutUs"},
     {name:"Contact",href:"/contact"},
-  ]
-  // State to track the active link
-  const [activeLink, setActiveLink] = useState<string>(Links[0].name);
-  // State to track which modal is shown
-  const [modalType, setModalType] = useState<"login" | "register" | null>(null);
+  ];
 
-  // This are 
+  const router = useRouter();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const [activeLink, setActiveLink] = useState<string>(Links[0].name);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    router.push('/');
+    setShowProfileMenu(false);
+  };
+
+  const handleProfileClick = () => {
+    router.push('/viewProfile');
+    setShowProfileMenu(false);
+  };
+
+  const handleRegisterClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setShowRegisterModal(true);
+  };
   
   return (
     <header className={styles.header}>
@@ -58,23 +75,53 @@ const Header = () => {
 
       {/* Right Section */}
       <div className={styles.rightSection}>
-        <div className={styles.authButtons}>
-          <button onClick={() => setModalType("login")} className={styles.signInButton}>
-            Sign in
-          </button>
-          <button onClick={() => setModalType("register")} className={styles.registerButton}>
-            Register
-          </button>
-        </div>
-        <div className={styles.rightButtons}>
-          <FontAwesomeIcon icon={faBell} />
-          <FontAwesomeIcon icon={faGear} />
-        </div>
+        {!isLoading && (
+          <>
+            {isAuthenticated && user ? (
+              <>
+                <div className={styles.userSection}>
+                  <button 
+                    className={styles.userButton}
+                    onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  >
+                    <FontAwesomeIcon icon={faUser} className={styles.userIcon} />
+                    <span className={styles.userName}>{user.firstName}</span>
+                  </button>
+                  {showProfileMenu && (
+                    <div className={styles.profileMenu}>
+                      <button onClick={handleProfileClick} className={styles.menuItem}>
+                        <FontAwesomeIcon icon={faUser} className={styles.menuIcon} />
+                        View Profile
+                      </button>
+                      <button onClick={handleLogout} className={styles.menuItem}>
+                        <FontAwesomeIcon icon={faSignOut} className={styles.menuIcon} />
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <div className={styles.rightButtons}>
+                  <FontAwesomeIcon icon={faBell} className={styles.icon} />
+                </div>
+              </>
+            ) : (
+              <div className={styles.authButtons}>
+                <Link href="/login" className={styles.signInButton}>
+                  Sign in
+                </Link>
+                <button onClick={handleRegisterClick} className={styles.registerButton}>
+                  Register
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
-      {/* Render Modal */}
-      {modalType === "login" && <SigninPage onClose={() => setModalType(null)} />}
-      {modalType === "register" && <RegisterPage onClose={() => setModalType(null)} />}
+      {/* Register Modal */}
+      {showRegisterModal && (
+        <RegisterPage onClose={() => setShowRegisterModal(false)} />
+      )}
     </header>
   );
 };

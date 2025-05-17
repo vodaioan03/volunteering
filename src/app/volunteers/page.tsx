@@ -314,60 +314,60 @@ const OpportunitiesPage = () => {
         </div>
         
         <div className={styles.listLayoutCards}>
-      {opportunities.map((opp, index) => {
-        const isFirstEnding = opp.id === firstEndingOpportunity?.id;
-        const isLastEnding = opp.id === lastEndingOpportunity?.id;
-        const isLastItem = index === opportunities.length - 1;
+          {opportunities.map((opp, index) => {
+            const isFirstEnding = opp.id === firstEndingOpportunity?.id;
+            const isLastEnding = opp.id === lastEndingOpportunity?.id;
+            const isLastItem = index === opportunities.length - 1;
 
-        return (
-          <div 
-            key={`${opp.id}-${index}`}
-            ref={isLastItem ? lastItemRef : null}
-            onClick={() => router.push(`/viewOpportunity?id=${opp.id}`)}
-            style={{
-              border: isFirstEnding ? "2px solid green" :
-                    isLastEnding ? "2px solid red" :
-                    "1px solid #ccc",
-              cursor: "pointer",
-              minHeight: "200px"
-            }}
-          >
-            <Card
-              id={opp.id}
-              image={opp.image}
-              name={opp.title}
-              organizer={opp.organizer}
-              views={opp.views}
-              endDate={opp.endDate}
-            />
-          </div>
-        );
-      })}
+            return (
+              <div 
+                key={`${opp.id}-${index}`}
+                ref={isLastItem ? lastItemRef : null}
+                onClick={() => router.push(`/viewOpportunity?id=${opp.id}`)}
+                style={{
+                  border: isFirstEnding ? "2px solid green" :
+                        isLastEnding ? "2px solid red" :
+                        "1px solid #ccc",
+                  cursor: "pointer"
+                }}
+              >
+                <Card
+                  id={opp.id}
+                  image={opp.image}
+                  name={opp.title}
+                  organizer={opp.organizer}
+                  views={opp.views}
+                  endDate={opp.endDate}
+                />
+              </div>
+            );
+          })}
+          
+          {/* Loading indicators */}
+          {isFetching && (
+            <div className={styles.loadingMore}>
+              <div className={styles.spinner}></div>
+              Loading more opportunities...
+            </div>
+          )}
+
+          {!hasMore && !loading && (
+            <div className={styles.endOfResults}>
+              You've reached the end of the list
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Create Form Modal */}
+      {isCreateFormOpen && (
+        <CreateForm
+          onClose={() => setIsCreateFormOpen(false)}
+          onCreateOpportunity={handleCreateOpportunity}
+          isOnline={networkStatus.isOnline && networkStatus.isServerAvailable}
+        />
+      )}
     </div>
- {/* Loading indicators */}
- {isFetching && (
-      <div className={styles.loadingMore}>
-        <div className={styles.spinner}></div>
-        Loading more opportunities...
-      </div>
-    )}
-
-    {!hasMore && !loading && (
-      <div className={styles.endOfResults}>
-        You've reached the end of the list
-      </div>
-    )}
-
-    {/* Create Form Modal */}
-    {isCreateFormOpen && (
-      <CreateForm
-        onClose={() => setIsCreateFormOpen(false)}
-        onCreateOpportunity={handleCreateOpportunity}
-        isOnline={networkStatus.isOnline && networkStatus.isServerAvailable}
-      />
-    )}
-  </div> {/* This closes the listLayout div */}
-</div>
   );
 };
 

@@ -1,138 +1,113 @@
 .pageContainer {
   display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  width: 100%;
-  min-height: 100vh; /* Full viewport height */
-  background-color: white;
-  margin: 0;
-  overflow: hidden; /* Prevent scrollbars */
-  height: auto;
+  min-height: 100vh;
+  background-color: #f9fafb;
 }
 
-/* Sidebar Container */
+/* Sidebar */
 .sideBar {
-  min-width: 12%;
-  max-width: 20%;
-  background-color: white; /* White background */
-  border: 1px solid #e0e0e0; /* Light border */
-  border-radius: 15px; /* Rounded corners */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-  padding: 20px; /* Padding inside the sidebar */
-  margin: 20px; /* Margin to separate from the main content */
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 250px;
+  background-color: white;
+  border-right: 1px solid #e5e7eb;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  align-items: center; /* Center buttons horizontally */
-  height: calc(100vh - 40px); /* Full height minus margin */
-  overflow-y: auto; /* Scroll if content overflows */
-  height: auto;
 }
 
-/* Sidebar List */
 .sideBarList {
-  width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center; /* Center buttons horizontally */
-  gap: 15px; /* Spacing between buttons */
+  gap: 15px;
 }
 
-/* Sidebar Button */
 .sideBarbutton {
-  width: 100%; /* Full width to accommodate text */
-  padding: 12px 20px; /* Padding inside the button */
+  width: 100%;
+  padding: 12px 20px;
   display: flex;
-  flex-direction: row; /* Align icon and text horizontally */
   align-items: center;
-  justify-content: flex-start; /* Align items to the left */
-  background-color: transparent; /* Transparent background */
-  border: 1px solid #e0e0e0; /* Light border */
-  border-radius: 10px; /* Slightly rounded corners */
-  color: #1e1e1e; /* Dark text color */
-  font-size: 16px; /* Font size */
-  font-weight: 500; /* Medium font weight */
-  text-decoration: none;
+  background-color: transparent;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  color: #1e1e1e;
+  font-size: 16px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease; /* Smooth transition */
-  white-space: nowrap; /* Prevent text from wrapping */
-  overflow: visible; /* Ensure text is fully visible */
-  text-overflow: clip; /* Disable ellipsis */
+  transition: all 0.3s ease;
 }
 
 .sideBarbutton:hover {
-  background-color: #f5f5f5; /* Light gray background on hover */
-  transform: translateX(5px); /* Slight move to the right */
-  border-color: #3b82f6; /* Blue border on hover */
+  background-color: #f5f5f5;
+  transform: translateX(5px);
+  border-color: #3b82f6;
 }
 
 .sideBarbutton p {
-  margin: 0 0 0 15px; /* Spacing between icon and text */
-  white-space: nowrap; /* Prevent text from wrapping */
-  overflow: hidden; /* Hide overflow */
-  text-overflow: ellipsis; /* Add ellipsis for long text */
+  margin: 0 0 0 15px;
 }
 
 .sideBarbutton .icon {
-  font-size: 18px; /* Icon size */
-  color: #3b82f6; /* Blue icon color */
+  font-size: 18px;
+  color: #3b82f6;
 }
 
-/* Active Sidebar Button */
 .sideBarbutton.active {
-  background-color: #3b82f6; /* Blue background for active button */
-  border-color: #3b82f6; /* Blue border for active button */
-  color: white; /* White text for active button */
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
 }
 
 .sideBarbutton.active .icon {
-  color: white; /* White icon for active button */
+  color: white;
 }
-
-
 
 /* Main Content */
 .listLayout {
-  flex: 1 1 auto; /* Allows it to grow and shrink */
+  flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
   background-color: white;
-  padding: 20px;
-  margin: 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  min-height: 0; /* Ensures it doesn't force parent to grow */
-  height: calc(100vh - 40px); /* Adjust for margin */
-  overflow: hidden; /* Prevents it from overflowing */
-  height: auto;
+  min-height: 100vh;
 }
 
-/* Title */
 .listLayoutTitle {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-  background-color: white;
-  font-size: 28px; /* Larger font size */
-  font-weight: 700; /* Bold font weight */
-  color: #2c3e50; /* Dark blue text */
-  text-transform: uppercase; /* Uppercase text */
-  letter-spacing: 1.5px; /* Increased letter spacing */
-  flex-shrink: 0;
+  padding: 24px;
+  font-size: 24px;
+  font-weight: 600;
+  color: #111827;
+  text-align: center;
 }
 
-/* Search Bar */
 .listLayoutSearch {
-  width: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
-  height: 8%;
+  gap: 16px;
+  padding: 16px 24px;
   background-color: white;
-  gap: 20px;
-  padding: 10px 20px; /* Added padding */
-  flex-shrink: 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.listLayoutCards {
+  flex: 1;
+  padding: 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  overflow-y: auto;
+}
+
+/* Keep your existing styles for buttons, search input, loading states, etc. */
+
+.listLayoutHeader {
+  position: sticky;
+  top: 0;
+  background-color: #ffffff;
+  padding: 24px;
+  border-bottom: 1px solid #e5e7eb;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .listLayoutSearchInput {
@@ -251,17 +226,6 @@
   box-shadow: none; /* Remove shadow */
 }
 
-/* Cards Grid */
-.listLayoutCards {
-  flex: 1 1 auto; /* Ensures it takes up available space */
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  padding: 20px;
-  min-height: 0; /* Prevents it from forcing the parent to grow */
-  height: auto;
-}
-
 /* Pagination */
 .paginationContainer {
   display: flex;
@@ -276,7 +240,6 @@
   font-weight: bold;
   color: #2c3e50; /* Dark blue text */
 }
-
 
 /* Add to your Analytics.module.css */
 .loading {
@@ -305,7 +268,6 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
-
 
 .error {
   display: flex;
@@ -345,52 +307,33 @@
 /* Add these to your Volunteers.module.css file */
 
 .loadingMore {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  text-align: center;
   padding: 20px;
-  color: #666;
-  font-size: 0.9rem;
-  background-color: #f8f8f8;
+  background-color: #ffffff;
   border-radius: 8px;
-  margin: 20px 0;
+  margin: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  animation: pulse 1.5s infinite ease-in-out;
 }
 
 .endOfResults {
   text-align: center;
   padding: 20px;
-  color: #888;
-  font-size: 0.9rem;
-  font-style: italic;
-  border-top: 1px solid #eee;
-  margin-top: 20px;
+  color: #6b7280;
+  background-color: #ffffff;
+  border-radius: 8px;
+  margin: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-@keyframes pulse {
-  0% {
-    opacity: 0.6;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0.6;
-  }
-}
-
-/* If you want to add a spinner icon */
-.loadingMore::before {
-  content: "";
+.spinner {
   display: inline-block;
-  width: 16px;
-  height: 16px;
-  border: 2px solid #ddd;
-  border-top-color: #4CAF50;
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
   border-radius: 50%;
+  border-top-color: #6001d2;
+  animation: spin 1s ease-in-out infinite;
   margin-right: 10px;
-  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
@@ -399,59 +342,161 @@
   }
 }
 
-/* Offline status banners */
+/* Responsive Design */
+@media (max-width: 768px) {
+  .sideBar {
+    position: fixed;
+    top: 0;
+    left: -250px; /* Hide sidebar by default on mobile */
+    transition: left 0.3s ease;
+    background-color: white;
+    height: 100vh;
+  }
+
+  .sideBar.open {
+    left: 0; /* Show sidebar when open class is added */
+  }
+
+  .listLayout {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .listLayoutSearch {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .listLayoutSearchInput,
+  .searchButton,
+  .addButton,
+  .sortButton {
+    width: 100%;
+  }
+
+  .listLayoutCards {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Offline Banner */
 .offlineBanner {
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 100;
-  padding: 12px 20px;
+  left: 250px; /* Match sidebar width */
+  right: 0;
+  padding: 12px;
+  background-color: #fef3c7;
+  color: #92400e;
+  text-align: center;
+  z-index: 41;
   display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 14px;
   justify-content: center;
-  animation: slideDown 0.3s ease-out;
+  align-items: center;
+  gap: 8px;
 }
 
 .networkOffline {
-  background-color: #ff9800;
-  color: white;
+  background-color: #fee2e2;
+  color: #991b1b;
 }
 
 .serverOffline {
-  background-color: #f44336;
-  color: white;
+  background-color: #fef3c7;
+  color: #92400e;
 }
 
 .pendingChanges {
-  margin-left: 15px;
-  padding: 3px 8px;
-  background-color: rgba(0, 0, 0, 0.2);
+  margin-left: 16px;
+  padding: 4px 8px;
+  background-color: rgba(0, 0, 0, 0.1);
   border-radius: 12px;
-  font-size: 12px;
+  font-size: 14px;
 }
 
-/* Loading spinner */
-.spinner {
-  width: 20px;
-  height: 20px;
-  border: 3px solid rgba(0, 0, 0, 0.1);
-  border-radius: 50%;
-  border-top-color: #4CAF50;
-  animation: spin 1s ease-in-out infinite;
+/* Mobile Menu Button */
+.mobileMenuButton {
+  display: none; /* Hidden by default on desktop */
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 50;
+  background: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  font-size: 20px;
+  color: #3b82f6;
+  transition: all 0.3s ease;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+.mobileMenuButton:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-@keyframes slideDown {
-  from {
-    transform: translateY(-100%);
-    opacity: 0;
+/* Update Responsive Design */
+@media (max-width: 768px) {
+  .mobileMenuButton {
+    display: block; /* Show on mobile */
   }
-  to {
-    transform: translateY(0);
-    opacity: 1;
+
+  .sideBar {
+    position: fixed;
+    top: 0;
+    left: -250px;
+    transition: left 0.3s ease;
+    background-color: white;
+    height: 100vh;
+    z-index: 45;
+  }
+
+  .sideBar.open {
+    left: 0;
+  }
+
+  .listLayout {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  /* Add overlay when sidebar is open */
+  .sideBar.open::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+  }
+
+  .listLayoutSearch {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px;
+  }
+
+  .listLayoutSearchInput,
+  .searchButton,
+  .addButton,
+  .sortButton {
+    width: 100%;
+    margin: 5px 0;
+  }
+
+  .listLayoutCards {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+}
+
+/* Adjust the offline banner to work with fixed sidebar */
+@media (max-width: 768px) {
+  .offlineBanner {
+    left: 0;
   }
 }
