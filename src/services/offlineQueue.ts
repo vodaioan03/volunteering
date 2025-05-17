@@ -2,7 +2,7 @@ import { opportunityService } from "./opportunities";
 const OFFLINE_QUEUE_KEY = 'offline_opportunities_queue';
 
 type QueueItem = {
-  type: 'CREATE' | 'UPDATE' | 'DELETE';
+  type: 'CREATE' | 'UPDATE' | 'DELETE' | 'WITHDRAW' | 'APPLY';
   data: any;
   timestamp: number;
 };

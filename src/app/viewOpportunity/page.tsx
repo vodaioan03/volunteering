@@ -5,7 +5,7 @@ import styles from "./ViewOpportunity.module.css";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Opportunity } from "@/types/opportunity";
 import { opportunityService } from "@/services/opportunities";
-import UpdateForm from "../updateForm/page";
+import UpdateForm from "../updateForm/UpdateForm";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faTrash, faCalendar, faUsers, faInfoCircle, faPaperclip, faDownload } from "@fortawesome/free-solid-svg-icons";
 import { useError } from "@/context/ErrorContext";
@@ -25,6 +25,7 @@ const ViewOpportunity = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [attachments, setAttachments] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const previousStateRef = useRef<Opportunity | null>(null);
 
   // Fetch opportunity data and attachments
   useEffect(() => {
@@ -129,7 +130,29 @@ const ViewOpportunity = () => {
 
   const handleUpdate = async (updatedData: { [key: string]: string }) => {
     try {
-      const updatedOpportunity = await opportunityService.update(
+      if (!id) {
+        showError('No opportunity ID found');
+        return;
+      }
+
+      // Store the previous state in case we need to revert
+      previousStateRef.current = opportunity;
+      
+      // Show optimistic update
+      setOpportunity(prev => prev ? {
+        ...prev,
+        title: updatedData.name,
+        organizer: updatedData.organizer,
+        shortDescription: updatedData.shortDescription,
+        image: updatedData.image,
+        endDate: updatedData.endDate
+      } : null);
+      
+      // Close modal
+      setShowUpdateModal(false);
+
+      // Attempt the update
+      await opportunityService.update(
         id,
         {
           title: updatedData.name,
@@ -140,11 +163,18 @@ const ViewOpportunity = () => {
           endDate: updatedData.endDate
         }
       );
-      setOpportunity(updatedOpportunity);
-      setShowUpdateModal(false);
+
+      // If successful, fetch fresh data
+      const refreshedData = await opportunityService.getById(id);
+      setOpportunity(refreshedData);
     } catch (error) {
+      // Revert to previous state on error
+      setOpportunity(previousStateRef.current);
+      
       if (error instanceof Error) {
         showError(error.message);
+        // Reopen modal if there was a validation error
+        setShowUpdateModal(true);
       } else {
         showError('Failed to update opportunity');
       }
@@ -286,11 +316,11 @@ const ViewOpportunity = () => {
           onClose={() => setShowUpdateModal(false)}
           onUpdateOpportunity={handleUpdate}
           initialData={{
-            image: opportunity.image,
             name: opportunity.title,
             organizer: opportunity.organizer,
             shortDescription: opportunity.shortDescription,
             endDate: opportunity.endDate,
+            image: opportunity.image,
           }}
         />
       )}

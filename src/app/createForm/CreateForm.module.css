@@ -3,54 +3,54 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* Ensure it's on top of other elements */
 }
 
 /* Modal content */
 .modalContent {
-  background-color: white;
-  border-radius: 16px; /* Rounded corners */
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); /* Stronger shadow for depth */
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
   width: 90%;
-  max-width: 500px; /* Limit maximum width */
-  padding: 32px; /* Increased padding */
+  max-width: 600px;
   position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.18); /* Subtle border for glass effect */
-  backdrop-filter: blur(10px); /* Glassmorphism effect */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* Close button */
 .closeButton {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 1rem;
+  right: 1rem;
   background: none;
   border: none;
-  font-size: 24px; /* Larger close button */
+  font-size: 1.2rem;
   cursor: pointer;
   color: #666;
-  transition: color 0.3s ease;
-}
-
-.closeButton:hover {
-  color: #333; /* Darker color on hover */
 }
 
 /* Header */
 .header {
-  font-size: 28px; /* Larger font size */
+  font-size: 1.5rem;
   font-weight: bold;
-  color: #2c3e50; /* Dark blue text */
-  margin-bottom: 24px; /* Increased margin */
-  text-align: center;
-  text-transform: uppercase; /* Uppercase text */
-  letter-spacing: 1px; /* Slight letter spacing */
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 /* Profile section */
@@ -62,31 +62,33 @@
 }
 
 /* Input fields */
+.formGrid {
+  display: grid;
+  gap: 1.5rem;
+}
+
 .inputGroup {
-  margin-bottom: 20px; /* Increased margin */
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .label {
-  font-size: 14px;
-  color: #555;
-  margin-bottom: 8px;
-  font-weight: 500; /* Medium font weight */
+  font-weight: 500;
+  color: #333;
 }
 
 .input {
-  width: 100%;
-  padding: 12px; /* Increased padding */
+  padding: 0.75rem;
   border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 14px;
-  color: #333;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 4px;
+  font-size: 1rem;
 }
 
 .input:focus {
-  border-color: #6001d2; /* Purple border on focus */
   outline: none;
-  box-shadow: 0 0 0 3px rgba(96, 1, 210, 0.1); /* Purple glow */
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
 }
 
 /* Date input */
@@ -108,74 +110,70 @@
 
 /* Error text */
 .errorText {
-  font-size: 12px;
-  color: #ff4d4d; /* Red error text */
-  margin-top: 4px;
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
 }
 
 /* Create button */
 .createButton {
-  width: 100%;
-  padding: 14px; /* Increased padding */
-  background: linear-gradient(45deg, #3b82f6, #6366f1); /* Blue gradient */
+  background-color: #28a745;
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: bold;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  transition: background-color 0.2s;
 }
 
 .createButton:hover {
-  background: linear-gradient(45deg, #2563eb, #4f46e5); /* Darker blue gradient on hover */
-  transform: translateY(-2px); /* Slight lift */
-  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Larger shadow on hover */
+  background-color: #218838;
 }
 
-.createButton:active {
-  background: linear-gradient(45deg, #1e40af, #3730a3); /* Even darker blue gradient on click */
-  transform: scale(0.98); /* Slightly shrink */
+.createButton:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
 }
 
 /* Footer */
 .footer {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
   display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 24px; /* Increased margin */
-  font-size: 14px;
+  align-items: center;
+  gap: 0.5rem;
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.footerText {
   color: #666;
 }
 
 .footerDot {
-  color: #999; /* Light gray dot */
+  color: #999;
 }
 
 .offlineBadge {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 8px;
-  font-size: 14px;
-  color: #ff9800;
-  font-weight: 500;
+  gap: 0.5rem;
+  background-color: #fff3cd;
+  color: #856404;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
 }
 
 .submitError {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px;
-  margin-bottom: 16px;
-  background-color: #f4433610;
-  border-left: 3px solid #f44336;
-  color: #f44336;
-  font-size: 14px;
-}
-
-.createButton:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
+  gap: 0.5rem;
 }

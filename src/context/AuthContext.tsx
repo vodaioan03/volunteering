@@ -7,6 +7,7 @@ import { User } from '@/types/auth';
 
 interface AuthContextType {
   user: User | null;
+  userId: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   logout: () => void;
@@ -16,6 +17,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
+  userId: null,
   isAuthenticated: false,
   isLoading: true,
   logout: () => {},
@@ -27,6 +29,7 @@ export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -35,8 +38,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         if (authService.isTokenValid()) {
           const currentUser = authService.getCurrentUser();
-          if (currentUser) {
+          const currentUserId = authService.getUserId();
+          if (currentUser && currentUserId) {
             setUser(currentUser);
+            setUserId(currentUserId);
             setIsAuthenticated(true);
           } else {
             // If we have a valid token but no user data, clear everything
@@ -47,7 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('Error initializing auth:', error);
         authService.logout();
       } finally {
-    setIsLoading(false);
+        setIsLoading(false);
       }
     };
 
@@ -57,6 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     authService.logout();
     setUser(null);
+    setUserId(null);
     setIsAuthenticated(false);
   };
 
@@ -68,6 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
     <AuthContext.Provider value={{
       user,
+      userId,
       isAuthenticated,
       isLoading,
       logout,

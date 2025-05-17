@@ -7,6 +7,21 @@ import { authService } from "./authService";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 const LOCAL_STORAGE_KEY = 'offline_opportunities_data';
 
+// Helper function to check if we're in a browser environment
+const isBrowser = () => typeof window !== 'undefined';
+
+// Define custom error types
+interface ApplicationError {
+  id: string;
+  opportunityId: string;
+  applicantId: string;
+  applicationDate: string;
+  status: string;
+  isOffline?: boolean;
+}
+
+type Application = ApplicationError;
+
 class OpportunityService {
   private getErrorMessage(error: unknown): string {
     if (error instanceof Error) {
@@ -119,10 +134,11 @@ class OpportunityService {
 
   // Cache individual pages
   private cachePage(page: number, data: Opportunity[]) {
+    if (!isBrowser()) return;
+    
     const cacheKey = `${LOCAL_STORAGE_KEY}_page_${page}`;
     try {
       localStorage.setItem(cacheKey, JSON.stringify(data));
-      // Update the list of cached pages
       const cachedPages = JSON.parse(localStorage.getItem(`${LOCAL_STORAGE_KEY}_pages`) || '[]');
       if (!cachedPages.includes(page)) {
         localStorage.setItem(
@@ -137,8 +153,9 @@ class OpportunityService {
 
   // Get cached data with proper error handling
   public getCachedData(): Opportunity[] {
+    if (!isBrowser()) return [];
+    
     try {
-      // Get all cached pages - with proper null handling
       const cachedPagesString = localStorage.getItem(`${LOCAL_STORAGE_KEY}_pages`);
       const cachedPages: number[] = cachedPagesString ? JSON.parse(cachedPagesString) : [];
       
@@ -211,6 +228,7 @@ class OpportunityService {
 
   // Cache data in localStorage
   private cacheData(data: any) {
+    if (!isBrowser()) return;
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
   }
 
@@ -293,8 +311,8 @@ public getCachedPage(page: number): Opportunity[] {
       const data = await this.makeRequest<Opportunity[]>('');
       this.cacheData(data);
       return data;
-    } catch (error) {
-      if (error.message === 'OFFLINE_MODE') {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message === 'OFFLINE_MODE') {
         return this.getCachedData();
       }
       throw error;
@@ -310,7 +328,7 @@ public getCachedPage(page: number): Opportunity[] {
       );
       this.cacheData(response.data);
       return response.data;
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof Error && error.message === 'OFFLINE_MODE') {
         const cached = this.getCachedData();
         return cached.sort((a, b) => 
@@ -328,27 +346,27 @@ public getCachedPage(page: number): Opportunity[] {
       );
       this.cacheData(response.data);
       return response.data;
-    } catch (error) {
-      if (error.message === 'OFFLINE_MODE') {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message === 'OFFLINE_MODE') {
         const cached = this.getCachedData();
         return cached.sort((a, b) => 
           new Date(b.endDate).getTime() - new Date(a.endDate).getTime()
         );
       }
-      throw error;
+      throw error instanceof Error ? error : new Error('Failed to get descending opportunities');
     }
   }
 
   public async getByTitle(title: string): Promise<Opportunity> {
     try {
       return await this.makeRequest<Opportunity>(`/${encodeURIComponent(title)}`);
-    } catch (error) {
-      if (error.message === 'OFFLINE_MODE') {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message === 'OFFLINE_MODE') {
         const found = this.getCachedData().find(o => o.title === title);
         if (!found) throw new Error('Opportunity not found in cache');
         return found;
       }
-      throw error;
+      throw error instanceof Error ? error : new Error('Failed to get opportunity by title');
     }
   }
 
@@ -359,14 +377,12 @@ public getCachedPage(page: number): Opportunity[] {
         views: "0"
       });
       
-      // Update cache with new item
       const cached = this.getCachedData();
       this.cacheData([...cached, result]);
       
       return result;
-    } catch (error) {
-      if (error.message === 'OFFLINE_MODE') {
-        // Add to offline queue
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message === 'OFFLINE_MODE') {
         const tempId = `offline-${Date.now()}`;
         const offlineOpportunity = {
           ...data,
@@ -380,27 +396,25 @@ public getCachedPage(page: number): Opportunity[] {
           data: offlineOpportunity
         });
 
-        // Update local cache for immediate UI update
         const cached = this.getCachedData();
         this.cacheData([...cached, offlineOpportunity]);
         
         return offlineOpportunity;
       }
-      throw error;
+      throw error instanceof Error ? error : new Error('Failed to create opportunity');
     }
   }
 
   public async getById(id: string): Promise<Opportunity> {
     try {
-      console.log(id)
       return await this.makeRequest<Opportunity>(`/getOpportunityById/${id}`);
-    } catch (error) {
-      if (error.message === 'OFFLINE_MODE') {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message === 'OFFLINE_MODE') {
         const found = this.getCachedData().find(o => o.id === id);
         if (!found) throw new Error('Opportunity not found in cache');
         return found;
       }
-      throw error;
+      throw error instanceof Error ? error : new Error('Failed to get opportunity by ID');
     }
   }
 
@@ -415,8 +429,8 @@ public getCachedPage(page: number): Opportunity[] {
       ));
       
       return result;
-    } catch (error) {
-      if (error.message === 'OFFLINE_MODE') {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message === 'OFFLINE_MODE') {
         // Add to offline queue
         offlineQueue.addToQueue({
           type: 'UPDATE',
@@ -425,11 +439,19 @@ public getCachedPage(page: number): Opportunity[] {
 
         // Update local cache for immediate UI update
         const cached = this.getCachedData();
+        const updatedItem = {
+          ...cached.find(item => item.id === id),
+          ...update,
+          isOffline: true,
+          views: "0" // Ensure views is a string
+        } as Opportunity;
+        
         this.cacheData(cached.map(item => 
-          item.id === id ? { ...item, ...update, isOffline: true } : item
+          item.id === id ? updatedItem : item
         ));
         
-        return { id, ...update } as Opportunity;
+        return updatedItem;
+
       }
       throw error;
     }
@@ -437,33 +459,27 @@ public getCachedPage(page: number): Opportunity[] {
 
   public async delete(id: string): Promise<void> {
     try {
-      // First validate the ID format
       if (!this.isValidUUID(id)) {
         throw new Error('Invalid opportunity ID format');
       }
   
-      // Remove from cache immediately
       const cached = this.getCachedData();
       this.cacheData(cached.filter(item => item.id !== id));
   
-      // Make the request - don't expect a response body
       await this.makeRequest<void>(`/deleteOpportunity/${id}`, 'DELETE');
   
-    } catch (error) {
-      console.error('Delete error:', error);
-      
-      if (error.message === 'OFFLINE_MODE') {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message === 'OFFLINE_MODE') {
         offlineQueue.addToQueue({
           type: 'DELETE',
           data: { id }
         });
       } else {
-        // Revert cache if online deletion failed
-        const opportunity = this.getById(id)
+        const opportunity = await this.getById(id);
         if (opportunity) {
           this.cacheData([...this.getCachedData(), opportunity]);
         }
-        throw error;
+        throw error instanceof Error ? error : new Error('Failed to delete opportunity');
       }
     }
   }
@@ -478,11 +494,11 @@ public getCachedPage(page: number): Opportunity[] {
       const response = await fetch(`${API_BASE_URL}/api/opportunities/${opportunityId}/attachments`);
       if (!response.ok) throw new Error('OFFLINE_MODE');
       return await response.json();
-    } catch (error) {
-      if (error.message === 'OFFLINE_MODE') {
-        return []; // Return empty array for attachments in offline mode
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message === 'OFFLINE_MODE') {
+        return [];
       }
-      throw error;
+      throw error instanceof Error ? error : new Error('Failed to get attachments');
     }
   }
 
@@ -495,11 +511,11 @@ public getCachedPage(page: number): Opportunity[] {
       
       if (!response.ok) throw new Error('OFFLINE_MODE');
       return await response.json();
-    } catch (error) {
-      if (error.message === 'OFFLINE_MODE') {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message === 'OFFLINE_MODE') {
         throw new Error('Attachments cannot be uploaded in offline mode');
       }
-      throw error;
+      throw error instanceof Error ? error : new Error('Failed to upload attachment');
     }
   }
 
@@ -513,11 +529,11 @@ public getCachedPage(page: number): Opportunity[] {
       
       const blob = await response.blob();
       return { data: blob, fileName };
-    } catch (error) {
-      if (error.message === 'OFFLINE_MODE') {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message === 'OFFLINE_MODE') {
         throw new Error('Attachments cannot be downloaded in offline mode');
       }
-      throw error;
+      throw error instanceof Error ? error : new Error('Failed to download attachment');
     }
   }
 
@@ -549,7 +565,7 @@ public async checkCanApply(opportunityId: string, userId: string): Promise<{ can
       { userId }
     );
     return response;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error checking application status:', error);
     return {
       canApply: false,
@@ -576,11 +592,9 @@ public async applyForOpportunity(opportunityId: string, userId: string): Promise
         { userId }
       );
       
-      // Update local cache
       this.cacheApplication(result);
       return result;
-    } catch (error) {
-      // Fallback to offline if online fails
+    } catch (error: unknown) {
       return this.handleOfflineApply(opportunityId, userId);
     }
   } else {
@@ -589,11 +603,13 @@ public async applyForOpportunity(opportunityId: string, userId: string): Promise
 }
 
 private cacheApplication(application: Application) {
+  if (!isBrowser()) return;
   const cached = this.getCachedApplications();
   localStorage.setItem('opportunity_applications', JSON.stringify([...cached, application]));
 }
 
 private getCachedApplications(): Application[] {
+  if (!isBrowser()) return [];
   const cached = localStorage.getItem('opportunity_applications');
   return cached ? JSON.parse(cached) : [];
 }
@@ -610,7 +626,7 @@ private handleOfflineApply(opportunityId: string, userId: string): Application {
   };
   
   offlineQueue.addToQueue({
-    type: 'APPLY',
+    type: 'CREATE',
     data: offlineApplication
   });
 
@@ -626,8 +642,9 @@ public async getApplicationStatus(opportunityId: string, userId: string): Promis
       { userId }
     );
     return response;
-  } catch (error) {
-    if (error.message === 'NETWORK_OFFLINE' || error.message === 'SERVER_UNAVAILABLE') {
+  } catch (error: unknown) {
+    if (error instanceof Error && 
+        (error.message === 'NETWORK_OFFLINE' || error.message === 'SERVER_UNAVAILABLE')) {
       // Check offline applications
       const cachedApplications = this.getCachedApplications();
       const application = cachedApplications.find(app => 
@@ -639,7 +656,7 @@ public async getApplicationStatus(opportunityId: string, userId: string): Promis
         isOffline: !!application?.isOffline
       };
     }
-    throw error;
+    throw error instanceof Error ? error : new Error('Failed to get application status');
   }
 }
 
@@ -654,18 +671,17 @@ public async withdrawApplication(opportunityId: string, userId: string): Promise
         { userId }
       );
       
-      // Update local cache
       const cached = this.getCachedApplications();
       localStorage.setItem('opportunity_applications', JSON.stringify(
         cached.filter(app => !(app.opportunityId === opportunityId && app.applicantId === userId))
       ));
-    } catch (error) {
-      throw error;
+    } catch (error: unknown) {
+      throw error instanceof Error ? error : new Error('Failed to withdraw application');
     }
   } else {
     // Add to offline queue
     offlineQueue.addToQueue({
-      type: 'WITHDRAW',
+      type: 'DELETE',
       data: { opportunityId, userId }
     });
     

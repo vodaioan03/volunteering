@@ -155,9 +155,13 @@ const ViewProfile = () => {
             <select
               name="gender"
               value={editedProfile?.gender || ''}
-              onChange={(e) => setEditedProfile(prev => ({ ...prev!, gender: e.target.value }))}
+              onChange={(e) => setEditedProfile(prev => ({ 
+                ...prev!, 
+                gender: e.target.value as 'MALE' | 'FEMALE' | 'OTHER' | undefined 
+              }))}
               className={styles.input}
             >
+              <option value="">Select gender</option>
               <option value="MALE">Male</option>
               <option value="FEMALE">Female</option>
               <option value="OTHER">Other</option>

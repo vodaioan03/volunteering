@@ -7,7 +7,7 @@ import { faCircleExclamation } from "@fortawesome/free-solid-svg-icons";
 
 const inputFields = [
   { label: "Image URL", name: "image" },
-  { label: "Name", name: "name" },
+  { label: "Title", name: "title" },
   { label: "Short Description", name: "shortDescription" },
   { label: "End Date", name: "endDate" },
 ];
@@ -24,7 +24,7 @@ const CreateForm: React.FC<CreateFormProps> = ({
   isOnline 
 }) => {
   const [formData, setFormData] = useState({
-    name: "",
+    title: "",
     organizer: "",
     shortDescription: "",
     endDate: "",
@@ -175,6 +175,6 @@ const CreateForm: React.FC<CreateFormProps> = ({
     </div>,
     document.body
   );
-};
+}; 
 
-export default CreateForm;
+export default CreateForm; 

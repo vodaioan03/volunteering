@@ -3,7 +3,7 @@ import React, { useState, useMemo, useEffect, useRef, useCallback } from "react"
 import styles from "./Volunteers.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch, faStar, faSort, faPlus, faWifi, faServer } from "@fortawesome/free-solid-svg-icons";
-import CreateForm from "../createForm/page";
+import CreateForm from "../createForm/CreateForm";
 import { useRouter } from "next/navigation";
 import Card from "@/components/cards/opportunitieCard/card";
 import { opportunityService } from "@/services/opportunities";
@@ -178,15 +178,15 @@ const OpportunitiesPage = () => {
   const handleCreateOpportunity = async (formData: Record<string, string>) => {
     try {
       const newOpportunity: OpportunityCreate = {
-        title: formData.name,
+        title: formData.title,
         organizer: formData.organizer,
-        shortDescription: formData.shortDescription || "",
-        description: formData.description || "",
+        shortDescription: formData.shortDescription,
+        description: formData.shortDescription,
         image: formData.image || "https://cdn.pixabay.com/photo/2021/01/04/10/41/icon-5887126_1280.png",
         endDate: formData.endDate,
       };
 
-      const createdOpportunity = await opportunityService.createWithOfflineSupport(newOpportunity);
+      await opportunityService.create(newOpportunity);
       await loadInitialData();
       setIsCreateFormOpen(false);
     } catch (error) {

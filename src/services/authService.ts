@@ -12,6 +12,9 @@ interface JwtPayload {
     exp: number;
 }
 
+// Helper function to check if we're in a browser environment
+const isBrowser = () => typeof window !== 'undefined';
+
 export const authService = {
     login: async (data: LoginDto): Promise<AuthResponse> => {
         const response = await fetch(`${API_URL}/api/auth/login`, {
@@ -31,47 +34,31 @@ export const authService = {
         }
 
         const result: AuthResponse = await response.json();
-        console.log('Login response:', { 
-            ...result, 
-            token: result.token ? 'Token exists' : 'No token',
-            requires2FA: result.requires2FA,
-            hastemporaryToken: !!result.temporaryToken
-        });
         
-        // Only store token and user info if 2FA is not required
-        if (!result.requires2FA) {
+        // Only store token and user info if 2FA is not required and we're in a browser
+        if (!result.requires2FA && isBrowser()) {
             if (!result.token) {
                 throw new Error('No token received from server');
             }
             localStorage.setItem('token', result.token);
-            console.log('Token stored in localStorage');
             
             try {
-                // Decode token to get user info
                 const decoded = jwtDecode<JwtPayload>(result.token);
-                console.log('Decoded token payload:', { ...decoded, sub: '[REDACTED]' });
-                
                 const user: User = {
                     email: decoded.email,
                     firstName: decoded.firstName,
                     lastName: decoded.lastName
                 };
                 localStorage.setItem('user', JSON.stringify(user));
-                console.log('User info stored in localStorage');
             } catch (error) {
-                console.error('Error decoding token:', error);
-                // Even if token decoding fails, try to get user info from the response
                 if (result.user) {
                     localStorage.setItem('user', JSON.stringify(result.user));
-                    console.log('User info stored from response');
                 }
             }
-        } else {
+        } else if (isBrowser()) {
             if (!result.temporaryToken) {
                 throw new Error('No temporary token received for 2FA');
             }
-            console.log('2FA is required, not storing permanent token yet');
-            // Make sure we don't have any old tokens when 2FA is required
             localStorage.removeItem('token');
             localStorage.removeItem('user');
         }
@@ -97,19 +84,20 @@ export const authService = {
         }
 
         const result: AuthResponse = await response.json();
-        localStorage.setItem('token', result.token);
         
-        // After registration, store the user data we just sent
-        const user: User = {
-            email: data.email,
-            firstName: data.firstName,
-            lastName: data.lastName
-        };
-        localStorage.setItem('user', JSON.stringify(user));
+        if (isBrowser()) {
+            localStorage.setItem('token', result.token);
+            const user: User = {
+                email: data.email,
+                firstName: data.firstName,
+                lastName: data.lastName
+            };
+            localStorage.setItem('user', JSON.stringify(user));
+        }
     },
 
     getCurrentUser: (): User | null => {
-        if (typeof window === 'undefined') return null;
+        if (!isBrowser()) return null;
         
         const userStr = localStorage.getItem('user');
         if (!userStr) return null;
@@ -117,12 +105,12 @@ export const authService = {
         try {
             return JSON.parse(userStr);
         } catch {
-      return null;
+            return null;
         }
     },
     
     getUserId: (): string | null => {
-        if (typeof window === 'undefined') return null;
+        if (!isBrowser()) return null;
         
         const token = localStorage.getItem('token');
         if (!token) return null;
@@ -136,18 +124,18 @@ export const authService = {
     },
 
     logout: () => {
-        if (typeof window === 'undefined') return;
+        if (!isBrowser()) return;
         localStorage.removeItem('user');
         localStorage.removeItem('token');
     },
 
     getToken: (): string | null => {
-        if (typeof window === 'undefined') return null;
+        if (!isBrowser()) return null;
         return localStorage.getItem('token');
     },
 
     isTokenValid: (): boolean => {
-        if (typeof window === 'undefined') return false;
+        if (!isBrowser()) return false;
         
         const token = localStorage.getItem('token');
         if (!token) return false;
@@ -159,4 +147,4 @@ export const authService = {
             return false;
         }
     }
-  };
+};

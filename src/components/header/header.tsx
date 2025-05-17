@@ -8,7 +8,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from "@/context/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBell, faUser, faSignOut } from "@fortawesome/free-solid-svg-icons";
-import RegisterPage from "@/app/register/page";
+import RegisterForm from "@/app/register/RegisterForm";
 
 const Header = () => {
   const Links = [
@@ -125,7 +125,7 @@ const Header = () => {
 
       {/* Register Modal */}
       {showRegisterModal && (
-        <RegisterPage onClose={() => setShowRegisterModal(false)} />
+        <RegisterForm onClose={() => setShowRegisterModal(false)} />
       )}
     </header>
   );

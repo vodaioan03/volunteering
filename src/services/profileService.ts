@@ -33,6 +33,9 @@ export interface ProfileUpdateDto {
     zipCode?: string;
 }
 
+// Helper function to check if we're in a browser environment
+const isBrowser = () => typeof window !== 'undefined';
+
 class ProfileService {
     private static instance: ProfileService;
     private readonly LOCAL_STORAGE_KEY = 'user_profile';
@@ -47,6 +50,10 @@ class ProfileService {
     }
 
     private async makeRequest<T>(endpoint: string, method: string = 'GET', body?: object): Promise<T> {
+        if (!isBrowser()) {
+            throw new Error('Cannot make requests during server-side rendering');
+        }
+
         const token = localStorage.getItem('token');
         if (!token) {
             throw new Error('No authentication token found');
@@ -151,6 +158,7 @@ class ProfileService {
     }
 
     private cacheProfile(profile: UserProfile): void {
+        if (!isBrowser()) return;
         try {
             localStorage.setItem(this.LOCAL_STORAGE_KEY, JSON.stringify(profile));
         } catch (error) {
@@ -161,6 +169,7 @@ class ProfileService {
     }
 
     private getCachedProfile(): UserProfile | null {
+        if (!isBrowser()) return null;
         try {
             const cached = localStorage.getItem(this.LOCAL_STORAGE_KEY);
             return cached ? JSON.parse(cached) : null;
@@ -173,6 +182,7 @@ class ProfileService {
     }
 
     public clearCache(): void {
+        if (!isBrowser()) return;
         localStorage.removeItem(this.LOCAL_STORAGE_KEY);
     }
 }
