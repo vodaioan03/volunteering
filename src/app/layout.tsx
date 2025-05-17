@@ -1,27 +1,16 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter, Roboto } from "next/font/google";
+import { Inter, Roboto } from "next/font/google";
 import "./globals.css";
 import Footer from "../components/footer/footer";
 import Header from "../components/header/header";
 import { OpportunitiesProvider } from "@/context/OpportunitiesContext";
 import { AuthProvider } from '@/context/AuthContext';
 import { ErrorProvider } from '@/context/ErrorContext';
-import { Html, Head, Main, NextScript } from 'next/document'
 
 /* Font awesome icons imports*/
 import { config } from '@fortawesome/fontawesome-svg-core'
 import '@fortawesome/fontawesome-svg-core/styles.css'
 config.autoAddCss = false
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 const inter = Inter({
   variable: "--font-inter",
@@ -37,6 +26,19 @@ const roboto = Roboto({
 export const metadata: Metadata = {
   title: "Volunteers Manager Application",
   description: "Created by Voda Ioan - University Project(In Progress...)",
+  openGraph: {
+    images: [
+      {
+        url: 'https://nonprofitssource.com/wp-content/uploads/2019/05/Volunteering-Statistics-and-Trends-Nonprofits-Source.jpg',
+        width: 1200,
+        height: 630,
+      }
+    ]
+  },
+  icons: {
+    icon: 'https://nonprofitssource.com/wp-content/uploads/2019/05/Volunteering-Statistics-and-Trends-Nonprofits-Source.jpg',
+    apple: 'https://nonprofitssource.com/wp-content/uploads/2019/05/Volunteering-Statistics-and-Trends-Nonprofits-Source.jpg',
+  }
 };
 
 export default function RootLayout({
@@ -46,23 +48,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <Head>
-        <link rel="icon" href="/photos/images.png" />
-        {/* Sau pentru PNG/SVG: */}
-        <link rel="icon" type="image/png" href="/photos/images.png" />
-        <link rel="apple-touch-icon" href="/photos/images.png" />
-      </Head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${roboto.variable} antialiased`}
+        className={`${inter.variable} ${roboto.variable} antialiased`}
       >
         <ErrorProvider>
           <AuthProvider>
-        <Header />
-          <OpportunitiesProvider>
-            {children}
-          </OpportunitiesProvider>
+            <Header />
+            <OpportunitiesProvider>
+              {children}
+            </OpportunitiesProvider>
             <Footer />
-        </AuthProvider>
+          </AuthProvider>
         </ErrorProvider>
       </body>
     </html>
