@@ -59,14 +59,7 @@ const ViewOpportunity = () => {
       formData.append("file", selectedFile);
       formData.append("opportunityId", id);
 
-      const config = {
-        onUploadProgress: (progressEvent: ProgressEvent) => {
-          const percentCompleted = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total
-          );
-          setUploadProgress(percentCompleted);
-        },
-      };
+      setUploadProgress(50);
 
       const response = await opportunityService.uploadAttachment(
         id,
@@ -107,6 +100,7 @@ const ViewOpportunity = () => {
     if (confirmDelete) {
       try {
         await opportunityService.delete(id);
+        
         router.push("/volunteers");
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to delete opportunity');
@@ -210,10 +204,16 @@ const ViewOpportunity = () => {
             <div className={styles.fileInfo}>
               <span>{selectedFile.name}</span>
               <span>{(selectedFile.size / (1024 * 1024)).toFixed(2)} MB</span>
-              <button onClick={handleUpload} className={styles.uploadSubmitButton}>
-                Upload
-              </button>
+              {uploadProgress === 0 && (
+                <button 
+                onClick={handleUpload} 
+                className={styles.uploadSubmitButton} 
+                id={selectedFile.name}>
+                  Upload
+                </button>
+              )}
             </div>
+            
           )}
           {uploadProgress > 0 && uploadProgress < 100 && (
             <div className={styles.progressBar}>

@@ -9,10 +9,10 @@ import Card from "@/components/cards/opportunitieCard/card";
 import { opportunityService } from "@/services/opportunities";
 import type { Opportunity, OpportunityCreate } from "@/types/opportunity";
 
+
 const OpportunitiesPage = () => {
   const router = useRouter();
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
-  const [sortedOpportunities, setSortedOpportunities] = useState<Opportunity[]>([]);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -23,30 +23,23 @@ const OpportunitiesPage = () => {
     isOnline: true,
     isServerAvailable: true
   });
-  const [showLoading, setShowLoading] = useState(false);
-  
-  // Sliding window state
-  const [windowStart, setWindowStart] = useState(0);
-  const windowSize = 10;
-  const loadMoreThreshold = 5;
+  const [currentPage, setCurrentPage] = useState(1);
   
   const observer = useRef<IntersectionObserver | null>(null);
-
+  const PAGE_SIZE = 10
   // Check network status periodically
   useEffect(() => {
     const checkStatus = async () => {
       const newStatus = await opportunityService.checkNetworkStatus();
       
-      // Only update state if status actually changed
       if (newStatus.isOnline !== networkStatus.isOnline || 
           newStatus.isServerAvailable !== networkStatus.isServerAvailable) {
         setNetworkStatus(newStatus);
         
-        // Only refresh if we've come back online
         if ((newStatus.isOnline && newStatus.isServerAvailable) && 
             (!networkStatus.isOnline || !networkStatus.isServerAvailable)) {
           await opportunityService.syncOfflineOperations();
-          loadOpportunities(); // Refresh data after coming back online
+          loadInitialData(); // Refresh data after coming back online
         }
       }
     };
@@ -55,40 +48,25 @@ const OpportunitiesPage = () => {
     checkStatus(); // Initial check
     
     return () => clearInterval(interval);
-  }, [networkStatus]); // Add networkStatus as dependency
+  }, [networkStatus]);
 
-  // Fetch initial opportunities
-  const loadOpportunities = async () => {
+  // Load initial data (featured + first page)
+  const loadInitialData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await opportunityService.getAll();
-      setOpportunities(data);
-      setSortedOpportunities(data.slice(0, windowSize));
-      setHasMore(data.length > windowSize);
+      const { data, total } = await opportunityService.getPaginated(1, PAGE_SIZE);
       
-      // Check if we're using cached data
-      const status = await opportunityService.checkNetworkStatus();
-      if (!status.isOnline || !status.isServerAvailable) {
-        // Optional: Show a subtle indicator that offline data is being shown
-        console.log('Showing cached opportunities data');
+      if (Array.isArray(data)) {
+        setOpportunities(data);
+        setHasMore(total > data.length);
+        setCurrentPage(1);
+      } else {
+        throw new Error('Received invalid data format');
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load opportunities';
       setError(errorMessage);
-      
-      // Even if error occurs, try to show cached data
-      try {
-        const cachedData = opportunityService.getCachedData();
-        if (cachedData.length > 0) {
-          setOpportunities(cachedData);
-          setSortedOpportunities(cachedData.slice(0, windowSize));
-          setHasMore(cachedData.length > windowSize);
-          console.log('Fell back to cached data after error');
-        }
-      } catch (cacheError) {
-        console.error('Failed to load cached data:', cacheError);
-      }
     } finally {
       setLoading(false);
     }
@@ -96,52 +74,50 @@ const OpportunitiesPage = () => {
 
   // Load more opportunities when scrolling
   const loadMoreOpportunities = useCallback(async () => {
-    if (isFetching || !hasMore) return;
+    console.log('Attempting to load more...');
+    console.log('Current state:', { isFetching, hasMore, currentPage });
+    
+    if (isFetching || !hasMore) {
+      console.log('Aborting - already fetching or no more items');
+      return;
+    }
     
     setIsFetching(true);
-    setShowLoading(true);
-    const minLoadTime = 500;
-
     try {
-      await Promise.all([
-        new Promise(resolve => setTimeout(resolve, minLoadTime)),
-        (async () => {
-          const newWindowStart = windowStart + windowSize;
-          const newData = opportunities.slice(newWindowStart, newWindowStart + windowSize);
-          
-          if (newData.length === 0) {
-            setHasMore(false);
-            return;
-          }
-          
-          setSortedOpportunities(prev => [...prev, ...newData]);
-          setWindowStart(newWindowStart);
-        })()
-      ]);
+      const nextPage = currentPage + 1;
+      const { data, total } = await opportunityService.getPaginated(nextPage, PAGE_SIZE);
+      
+      setOpportunities(prev => {
+        // Filter out duplicates just in case
+        const newItems = data.filter(newItem => 
+          !prev.some(existingItem => existingItem.id === newItem.id)
+        );
+        return [...prev, ...newItems];
+      });
+      
+      setHasMore((nextPage * PAGE_SIZE) < total);
+      setCurrentPage(nextPage);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load more opportunities');
     } finally {
-      setShowLoading(false);
       setIsFetching(false);
     }
-  }, [isFetching, hasMore, opportunities, windowStart, windowSize]);
+  }, [isFetching, hasMore, currentPage]);
 
-  // Observer callback
+  // Observer callback for infinite scroll
   const lastItemRef = useCallback((node: HTMLDivElement) => {
-    if (isFetching) return;
+    if (isFetching || !hasMore) return;
     
-    if (observer.current) {
-      observer.current.disconnect();
-    }
-
+    if (observer.current) observer.current.disconnect();
+  
     if (node) {
       observer.current = new IntersectionObserver(
         (entries) => {
-          if (entries[0].isIntersecting && hasMore && !isFetching) {
+          if (entries[0].isIntersecting && !isFetching && hasMore) {
             loadMoreOpportunities();
           }
         },
-        { root: null, rootMargin: "20px", threshold: 0.1 }
+        { root: null, rootMargin: "100px", threshold: 0.1 } // Increased margin
       );
       observer.current.observe(node);
     }
@@ -150,38 +126,48 @@ const OpportunitiesPage = () => {
   // Cleanup observer
   useEffect(() => {
     return () => {
-      if (observer.current) {
-        observer.current.disconnect();
-      }
+      if (observer.current) observer.current.disconnect();
     };
   }, []);
 
   // Initial load
   useEffect(() => {
-    loadOpportunities();
+    loadInitialData();
   }, []);
+
+  const sortedOpportunities = useMemo(() => {
+    return [...opportunities].sort((a, b) => 
+      sortOrder === "asc"
+        ? new Date(a.endDate).getTime() - new Date(b.endDate).getTime()
+        : new Date(b.endDate).getTime() - new Date(a.endDate).getTime()
+    );
+  }, [opportunities, sortOrder]);
 
   // Sort opportunities
   const sortOpportunities = async () => {
     try {
       setLoading(true);
-      const data = sortOrder === "asc" 
+      const allData = sortOrder === "asc" 
         ? await opportunityService.getAscending() 
         : await opportunityService.getDescending();
-      setOpportunities(data);
-      setSortedOpportunities(data.slice(0, windowSize));
-      setWindowStart(0);
-      setHasMore(data.length > windowSize);
+      
+      if (Array.isArray(allData)) {
+        // Keep existing loaded items if they match the current sort
+        const sortedData = [...allData].sort((a, b) => 
+          sortOrder === "asc" 
+            ? new Date(a.endDate).getTime() - new Date(b.endDate).getTime()
+            : new Date(b.endDate).getTime() - new Date(a.endDate).getTime()
+        );
+        
+        setOpportunities(sortedData.slice(0, currentPage * PAGE_SIZE));
+        setHasMore(sortedData.length > currentPage * PAGE_SIZE);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to sort opportunities');
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    sortOpportunities();
-  }, [sortOrder]);
 
   // Navigation functions
   const navigateTo = (route: string) => {
@@ -198,10 +184,12 @@ const OpportunitiesPage = () => {
 
   // Toggle sorting order
   const toggleSortOrder = () => {
-    setSortOrder(prev => prev === "asc" ? "desc" : "asc");
+    const newOrder = sortOrder === "asc" ? "desc" : "asc";
+    setSortOrder(newOrder);
+    sortOpportunities(); // Actually trigger the sort
   };
 
-  // Handle opportunity creation with offline support
+  // Handle opportunity creation
   const handleCreateOpportunity = async (formData: Record<string, string>) => {
     try {
       const newOpportunity: OpportunityCreate = {
@@ -215,13 +203,8 @@ const OpportunitiesPage = () => {
 
       const createdOpportunity = await opportunityService.createWithOfflineSupport(newOpportunity);
       
-      setOpportunities(prev => [...prev, {
-        ...createdOpportunity,
-        views: createdOpportunity.views || "0"
-      }]);
-      
-      // Re-sort after adding new opportunity
-      await sortOpportunities();
+      // Refresh data after creation
+      await loadInitialData();
       setIsCreateFormOpen(false);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to create opportunity';
@@ -230,12 +213,7 @@ const OpportunitiesPage = () => {
     }
   };
 
-  // Handle opportunity click
-  const handleOpportunityClick = (opp: Opportunity) => {
-    router.push(`/viewOpportunity?id=${opp.id}`);
-  };
-
-  // Get first/last ending opportunities from the full sorted list
+  // Get first/last ending opportunities
   const [firstEndingOpportunity, lastEndingOpportunity] = useMemo(() => {
     if (opportunities.length === 0) return [null, null];
     return sortOrder === "asc" 
@@ -243,20 +221,13 @@ const OpportunitiesPage = () => {
       : [opportunities[opportunities.length - 1], opportunities[0]];
   }, [opportunities, sortOrder]);
 
-  if (loading) return (
-    <div className={styles.loading}>
-      Loading opportunities...
-    </div>
-  );
+  if (loading) return <div className={styles.loading}>Loading opportunities...</div>;
   
   if (error) return (
     <div className={styles.error}>
       <div className={styles.errorIcon}>⚠️</div>
       Error: {error}
-      <button 
-        className={styles.retryButton} 
-        onClick={loadOpportunities}
-      >
+      <button className={styles.retryButton} onClick={loadInitialData}>
         Retry
       </button>
     </div>
@@ -343,62 +314,60 @@ const OpportunitiesPage = () => {
         </div>
         
         <div className={styles.listLayoutCards}>
-          {sortedOpportunities.map((opp, index) => {
-            const isFirstEnding = opp.id === firstEndingOpportunity?.id;
-            const isLastEnding = opp.id === lastEndingOpportunity?.id;
-            const isLastItem = index === sortedOpportunities.length - 1;
+      {opportunities.map((opp, index) => {
+        const isFirstEnding = opp.id === firstEndingOpportunity?.id;
+        const isLastEnding = opp.id === lastEndingOpportunity?.id;
+        const isLastItem = index === opportunities.length - 1;
 
-            return (
-              <div 
-                key={`${opp.id}-${index}`}
-                ref={isLastItem ? lastItemRef : null}
-                onClick={() => handleOpportunityClick(opp)}
-                style={{
-                  border: isFirstEnding ? "2px solid green" :
-                         isLastEnding ? "2px solid red" :
-                         "1px solid #ccc",
-                  cursor: "pointer",
-                  minHeight: "200px"
-                }}
-              >
-                <Card
-                  id={opp.id}
-                  image={opp.image}
-                  name={opp.title}
-                  organizer={opp.organizer}
-                  views={opp.views}
-                  endDate={opp.endDate}
-                  isOffline={!!opp.isOffline}
-                />
-              </div>
-            );
-          })}
-        </div>
-        
-        {/* Loading indicators */}
-        {(showLoading || isFetching) && (
-          <div className={styles.loadingMore}>
-            <div className={styles.spinner}></div>
-            Loading more opportunities...
+        return (
+          <div 
+            key={`${opp.id}-${index}`}
+            ref={isLastItem ? lastItemRef : null}
+            onClick={() => router.push(`/viewOpportunity?id=${opp.id}`)}
+            style={{
+              border: isFirstEnding ? "2px solid green" :
+                    isLastEnding ? "2px solid red" :
+                    "1px solid #ccc",
+              cursor: "pointer",
+              minHeight: "200px"
+            }}
+          >
+            <Card
+              id={opp.id}
+              image={opp.image}
+              name={opp.title}
+              organizer={opp.organizer}
+              views={opp.views}
+              endDate={opp.endDate}
+            />
           </div>
-        )}
-        
-        {!hasMore && !loading && (
-          <div className={styles.endOfResults}>
-            You've reached the end of the list
-          </div>
-        )}
-      </div>
-      
-      {/* Create Form Modal */}
-      {isCreateFormOpen && (
-        <CreateForm
-          onClose={() => setIsCreateFormOpen(false)}
-          onCreateOpportunity={handleCreateOpportunity}
-          isOnline={networkStatus.isOnline && networkStatus.isServerAvailable}
-        />
-      )}
+        );
+      })}
     </div>
+ {/* Loading indicators */}
+ {isFetching && (
+      <div className={styles.loadingMore}>
+        <div className={styles.spinner}></div>
+        Loading more opportunities...
+      </div>
+    )}
+
+    {!hasMore && !loading && (
+      <div className={styles.endOfResults}>
+        You've reached the end of the list
+      </div>
+    )}
+
+    {/* Create Form Modal */}
+    {isCreateFormOpen && (
+      <CreateForm
+        onClose={() => setIsCreateFormOpen(false)}
+        onCreateOpportunity={handleCreateOpportunity}
+        isOnline={networkStatus.isOnline && networkStatus.isServerAvailable}
+      />
+    )}
+  </div> {/* This closes the listLayout div */}
+</div>
   );
 };
 

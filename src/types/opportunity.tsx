@@ -23,6 +23,16 @@ export interface Opportunity {
   /** Last update timestamp (ISO) */
   updatedAt?: string;
 }
+// Add this interface near your other types
+export interface Application {
+  id?: string;
+  opportunityId: string;
+  applicantId: string;
+  applicationDate: string;
+  status?: string;
+  // Add any other application-specific fields
+}
+
 
 /**
  * Type for creating new opportunities (excludes server-managed fields)

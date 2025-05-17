@@ -2,7 +2,7 @@
 .card {
     width: 100%;
     max-width: 250px; /* Fixed width */
-    height: 280px; /* Fixed height */
+    height: 380px; /* Fixed height */
     background-color: white;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -32,14 +32,33 @@
     object-fit: cover; /* Ensure the image covers the entire area without distortion */
 }
 
-/* Card Content */
+/* Apply Button */
+.applyButton {
+    width: 100%;
+    padding: 8px 16px;
+    background-color: #4CAF50; /* Green background */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: auto; /* Push button to bottom */
+    transition: background-color 0.3s ease;
+}
+
+.applyButton:hover {
+    background-color: #45a049; /* Darker green on hover */
+}
+
+/* Adjust cardContent to properly space the button */
 .cardContent {
     padding: 16px;
     display: flex;
     flex-direction: column;
     gap: 8px;
     width: 100%;
-    flex-grow: 1; /* Allow content to grow and fill remaining space */
+    flex-grow: 1;
+    height: calc(100% - 200px); /* Account for image height */
 }
 
 /* Card Title (Name) */

@@ -6,6 +6,7 @@ type QueueItem = {
   data: any;
   timestamp: number;
 };
+import localforage from 'localforage';
 
 class OfflineQueue {
   private queue: QueueItem[] = [];
@@ -14,13 +15,13 @@ class OfflineQueue {
     this.loadQueue();
   }
 
-  private loadQueue() {
-    const saved = localStorage.getItem(OFFLINE_QUEUE_KEY);
+  private async loadQueue() {
+    const saved = await localforage.getItem<string>(OFFLINE_QUEUE_KEY);
     this.queue = saved ? JSON.parse(saved) : [];
   }
 
-  private saveQueue() {
-    localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(this.queue));
+  private async saveQueue() {
+    await localforage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(this.queue));
   }
 
   public addToQueue(item: Omit<QueueItem, 'timestamp'>) {

@@ -1,87 +1,142 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Chart, registerables } from "chart.js";
 import styles from "./Analytics.module.css";
-import { useOpportunitiesWebSocket } from "@/hooks/useOpportunitiesWebSocket";
-import { Opportunity } from "@/types/opportunity";
+import { analyticsService } from "@/services/AnalyticsService";
 
 // Register Chart.js components
 Chart.register(...registerables);
 
+interface OrganizerData {
+  name: string;
+  count: number;
+}
+
+interface MonthlyData {
+  [key: string]: number;
+}
+
+interface ViewsData {
+  [key: string]: number;
+}
+
+interface ChartData {
+  organizers: OrganizerData[];
+  monthly: MonthlyData;
+  views: ViewsData;
+  summary: any; // Replace with proper type if possible
+}
+
 const AnalyticsPage = () => {
-  // Use the custom hook for data fetching and WebSocket management
-  const { opportunities, loading, error, connectionStatus } = useOpportunitiesWebSocket();
+  const [chartData, setChartData] = useState<ChartData>({
+    organizers: [],
+    monthly: {},
+    views: {},
+    summary: null
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Chart refs
-  const chartRef1 = useRef<Chart<"bar", number[], string> | null>(null);
-  const chartRef2 = useRef<Chart<"line", number[], string> | null>(null);
-  const chartRef3 = useRef<Chart<"pie", number[], string> | null>(null);
-  const chartContainer1 = useRef<HTMLCanvasElement | null>(null);
-  const chartContainer2 = useRef<HTMLCanvasElement | null>(null);
-  const chartContainer3 = useRef<HTMLCanvasElement | null>(null);
+  const chartRef1 = useRef<Chart | null>(null);
+  const chartRef2 = useRef<Chart | null>(null);
+  const chartRef3 = useRef<Chart | null>(null);
+  const chartContainer1 = useRef<HTMLCanvasElement>(null);
+  const chartContainer2 = useRef<HTMLCanvasElement>(null);
+  const chartContainer3 = useRef<HTMLCanvasElement>(null);
 
-  // Process data for charts
   useEffect(() => {
-    if (opportunities.length === 0) return;
+    const loadData = async () => {
+      try {
+        const [organizers, monthly, views, summary] = await Promise.all([
+          analyticsService.getTopOrganizers(),
+          analyticsService.getMonthlyCounts(),
+          analyticsService.getViewsDistribution(),
+          analyticsService.getSummaryStats()
+        ]);
+        
+        setChartData({
+          organizers: Array.isArray(organizers) ? organizers : [],
+          monthly: monthly || {},
+          views: views || {},
+          summary
+        });
+      } catch (error) {
+        console.error("Failed to load analytics", error);
+        setError("Failed to load analytics data");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    // Organizer Data
-    const organizerCounts: { [key: string]: number } = {};
-    opportunities.forEach((opp) => {
-      organizerCounts[opp.organizer] = (organizerCounts[opp.organizer] || 0) + 1;
-    });
+    loadData();
+  }, []);
 
-    // End Date Data
-    const endDateCounts: { [key: string]: number } = {};
-    opportunities.forEach((opp) => {
-      const date = new Date(opp.endDate);
-      const monthYear = `${date.getMonth() + 1}/${date.getFullYear()}`;
-      endDateCounts[monthYear] = (endDateCounts[monthYear] || 0) + 1;
-    });
-
-    // Views Data
-    const viewsCounts = { High: 0, Medium: 0, Low: 0 };
-    opportunities.forEach((opp) => {
-      const views = parseInt(opp.views.replace("k", "")) * 1000;
-      if (views > 3000) viewsCounts.High++;
-      else if (views > 1000) viewsCounts.Medium++;
-      else viewsCounts.Low++;
-    });
-
-    // Update charts
-    updateChart1(organizerCounts);
-    updateChart2(endDateCounts);
-    updateChart3(viewsCounts);
-  }, [opportunities]);
+  // Initialize charts when data loads
+  useEffect(() => {
+    if (!loading && chartData.organizers.length > 0) {
+      updateChart1(chartData.organizers);
+      updateChart2(chartData.monthly);
+      updateChart3(chartData.views);
+    }
+  }, [loading, chartData]);
 
   // Chart update functions
-  const updateChart1 = (data: { [key: string]: number }) => {
-    if (!chartContainer1.current) return;
+  const updateChart1 = (data: OrganizerData[]) => {
+    try {
+      if (!chartContainer1.current) {
+        console.warn("Chart container 1 not found");
+        return;
+      }
+      
+      const ctx = chartContainer1.current.getContext("2d");
+      if (!ctx) {
+        console.warn("Could not get 2D context");
+        return;
+      }
     
-    const ctx = chartContainer1.current.getContext("2d");
-    if (!ctx) return;
-
-    if (chartRef1.current) chartRef1.current.destroy();
-
-    chartRef1.current = new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: Object.keys(data),
-        datasets: [{
-          label: "Opportunities by Organizer",
-          data: Object.values(data),
-          backgroundColor: "rgba(75, 192, 192, 0.6)",
-          borderColor: "rgba(75, 192, 192, 1)",
-          borderWidth: 1,
-        }],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: { y: { beginAtZero: true } },
-      },
-    });
+      // Destroy previous chart if exists
+      if (chartRef1.current) {
+        chartRef1.current.destroy();
+        chartRef1.current = null;
+      }
+    
+      // Don't proceed if no data
+      if (!data || data.length === 0) {
+        console.warn("No data provided for chart 1");
+        return;
+      }
+    
+      chartRef1.current = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: data.map(item => item.name),
+          datasets: [{
+            label: "Top Organizers",
+            data: data.map(item => item.count),
+            backgroundColor: "rgba(75, 192, 192, 0.6)",
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false, // Add this
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} opportunities` } }
+          },
+          scales: { 
+            y: { 
+              beginAtZero: true,
+              title: { display: true, text: 'Number of Opportunities' }
+            },
+            x: { title: { display: true, text: 'Organizer' } }
+          },
+        },
+      });
+    } catch (error) {
+      console.error("Error creating chart 1:", error);
+    }
   };
-
   const updateChart2 = (data: { [key: string]: number }) => {
     if (!chartContainer2.current) return;
     
@@ -111,9 +166,10 @@ const AnalyticsPage = () => {
       },
       options: {
         responsive: true,
-        maintainAspectRatio: false,
-        scales: { y: { beginAtZero: true } },
-      },
+        plugins: {
+          tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} opportunities ending` } }
+        }
+      }
     });
   };
 
@@ -147,12 +203,14 @@ const AnalyticsPage = () => {
       },
       options: {
         responsive: true,
-        maintainAspectRatio: false,
-      },
+        plugins: {
+          tooltip: { callbacks: { label: ctx => ` ${ctx.raw} opportunities` } }
+        }
+      }
     });
   };
 
-  if (loading && opportunities.length === 0) {
+  if (loading) {
     return <div className={styles.container}>Loading analytics...</div>;
   }
 
@@ -163,9 +221,6 @@ const AnalyticsPage = () => {
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Analytics Dashboard</h1>
-      <div className={styles.connectionStatus}>
-        Status: <span className={styles[connectionStatus]}>{connectionStatus}</span>
-      </div>
       
       <div className={styles.chartContainer}>
         <div className={styles.chart}>
