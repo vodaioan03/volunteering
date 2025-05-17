@@ -1,6 +1,6 @@
 // services/analyticsService.ts
 class AnalyticsService {
-    private API_BASE = "http://localhost:8080";
+    private API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
   
     async getTopOrganizers(limit = 10) {
       const response = await fetch(`${this.API_BASE}/api/analytics/top-organizers?limit=${limit}`);

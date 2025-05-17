@@ -110,14 +110,14 @@ const Header = () => {
                 </div>
               </>
             ) : (
-              <div className={styles.authButtons}>
+        <div className={styles.authButtons}>
                 <Link href="/login" className={styles.signInButton}>
-                  Sign in
+            Sign in
                 </Link>
                 <button onClick={handleRegisterClick} className={styles.registerButton}>
-                  Register
-                </button>
-              </div>
+            Register
+          </button>
+        </div>
             )}
           </>
         )}

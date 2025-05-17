@@ -6,16 +6,21 @@ import Link from 'next/link';
 import { authService } from '@/services/authService';
 import { LoginDto, ValidationError } from '@/types/auth';
 import { useAuth } from '@/context/AuthContext';
+import { useError } from '@/context/ErrorContext';
+import TwoFactorVerify from '@/components/twoFactorVerify/TwoFactorVerify';
 
 export default function LoginPage() {
     const router = useRouter();
     const { setUser, setIsAuthenticated } = useAuth();
+    const { showError } = useError();
     const [formData, setFormData] = useState<LoginDto>({
         email: '',
         password: '',
     });
     const [errors, setErrors] = useState<ValidationError[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [showTwoFactor, setShowTwoFactor] = useState(false);
+    const [temporaryToken, settemporaryToken] = useState('');
 
     const validateForm = (): boolean => {
         const newErrors: ValidationError[] = [];
@@ -43,27 +48,39 @@ export default function LoginPage() {
 
         setIsLoading(true);
         try {
-            await authService.login(formData);
-            const currentUser = authService.getCurrentUser();
-            if (currentUser) {
-                setUser(currentUser);
-                setIsAuthenticated(true);
+            const response = await authService.login(formData);
+            
+            if (response.requires2FA) {
+                settemporaryToken(response.temporaryToken || '');
+                setShowTwoFactor(true);
+            } else {
+                const currentUser = authService.getCurrentUser();
+                if (currentUser) {
+                    setUser(currentUser);
+                    setIsAuthenticated(true);
+                }
+                router.push('/'); // Redirect to home page after successful login
             }
-            router.push('/'); // Redirect to home page after successful login
         } catch (error) {
-            setErrors([{ field: 'general', message: error instanceof Error ? error.message : 'Login failed' }]);
+            showError(error instanceof Error ? error.message : 'Login failed');
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+    const handleTwoFactorSuccess = () => {
+        const currentUser = authService.getCurrentUser();
+        if (currentUser) {
+            setUser(currentUser);
+            setIsAuthenticated(true);
+        }
+        router.push('/');
     };
 
-    const getFieldError = (field: string) => {
-        return errors.find(error => error.field === field)?.message;
+    const handleTwoFactorCancel = () => {
+        setShowTwoFactor(false);
+        settemporaryToken('');
+        authService.logout();
     };
 
     return (
@@ -81,13 +98,11 @@ export default function LoginPage() {
                     </p>
                 </div>
 
-                {getFieldError('general') && (
-                    <div className="rounded-md bg-red-50 p-4">
-                        <div className="text-sm text-red-700">
-                            {getFieldError('general')}
-                        </div>
-                    </div>
-                )}
+                {errors.map((error, index) => (
+                    <p key={index} className="text-red-500 text-sm">
+                        {error.message}
+                    </p>
+                ))}
 
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                     <div className="rounded-md shadow-sm -space-y-px">
@@ -100,15 +115,12 @@ export default function LoginPage() {
                                 autoComplete="email"
                                 required
                                 className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${
-                                    getFieldError('email') ? 'border-red-300' : 'border-gray-300'
+                                    errors.find(error => error.field === 'email') ? 'border-red-300' : 'border-gray-300'
                                 } placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
                                 placeholder="Email address"
                                 value={formData.email}
-                                onChange={handleChange}
+                                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                             />
-                            {getFieldError('email') && (
-                                <p className="mt-1 text-sm text-red-600">{getFieldError('email')}</p>
-                            )}
                         </div>
                         <div>
                             <label htmlFor="password" className="sr-only">Password</label>
@@ -119,15 +131,12 @@ export default function LoginPage() {
                                 autoComplete="current-password"
                                 required
                                 className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${
-                                    getFieldError('password') ? 'border-red-300' : 'border-gray-300'
+                                    errors.find(error => error.field === 'password') ? 'border-red-300' : 'border-gray-300'
                                 } placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
                                 placeholder="Password"
                                 value={formData.password}
-                                onChange={handleChange}
+                                onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                             />
-                            {getFieldError('password') && (
-                                <p className="mt-1 text-sm text-red-600">{getFieldError('password')}</p>
-                            )}
                         </div>
                     </div>
 
@@ -148,7 +157,24 @@ export default function LoginPage() {
                         </button>
                     </div>
                 </form>
+
+                <div className="text-sm text-center">
+                    <Link href="#" className="font-medium text-indigo-600 hover:text-indigo-500" onClick={(e) => {
+                        e.preventDefault();
+                        router.push('/register');
+                    }}>
+                        Don't have an account? Register
+                    </Link>
+                </div>
             </div>
+
+            {showTwoFactor && (
+                <TwoFactorVerify
+                    temporaryToken={temporaryToken}
+                    onSuccess={handleTwoFactorSuccess}
+                    onCancel={handleTwoFactorCancel}
+                />
+            )}
         </div>
     );
 } 

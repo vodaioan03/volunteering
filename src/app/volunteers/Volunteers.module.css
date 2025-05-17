@@ -346,7 +346,7 @@
   border-radius: 8px;
   margin: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
+  }
 
 .spinner {
   display: inline-block;
@@ -495,7 +495,7 @@
   .listLayout {
     margin-left: 0;
     width: 100%;
-  }
+}
 
   /* Add overlay when sidebar is open */
   .sideBar.open::before {

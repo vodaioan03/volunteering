@@ -86,15 +86,15 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onClose }) => {
   if (typeof window === 'undefined') return null;
 
   return createPortal(
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+      <div className={styles.modalOverlay} onClick={onClose}>
+        <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <button className={styles.closeButton} onClick={onClose}>✖</button>
         
-        <div className={styles.header}>Create Account</div>
+      <div className={styles.header}>Create Account</div>
 
-        <div className={styles.profileSection}>
-          <UserAvatar />
-        </div>
+      <div className={styles.profileSection}>
+        <UserAvatar />
+      </div>
 
         {getFieldError('general') && (
           <div className={styles.error}>
@@ -161,17 +161,17 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onClose }) => {
             {getFieldError('password') && (
               <span className={styles.errorText}>{getFieldError('password')}</span>
             )}
-          </div>
+      </div>
 
           <button
             type="submit"
             disabled={isLoading}
-            className={styles.createButton}
-          >
+          className={styles.createButton}
+        >
             {isLoading ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>
-      </div>
+       </div>
     </div>,
     document.body
   );

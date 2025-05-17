@@ -3,25 +3,25 @@ class NetworkService {
   private serverAvailable: boolean = true;
 
   constructor() {
-    // Initialize with safe defaults for SSR
-    this.isOnline = typeof window !== 'undefined' ? navigator.onLine : true;
+      // Initialize with safe defaults for SSR
+      this.isOnline = typeof window !== 'undefined' ? navigator.onLine : true;
     this.serverAvailable = this.isOnline;
-    
-    // Only add event listeners in the browser
-    if (typeof window !== 'undefined') {
-      window.addEventListener('online', this.handleOnline);
-      window.addEventListener('offline', this.handleOffline);
-    }
+      
+      // Only add event listeners in the browser
+      if (typeof window !== 'undefined') {
+          window.addEventListener('online', this.handleOnline);
+          window.addEventListener('offline', this.handleOffline);
+      }
   }
 
   private handleOnline = () => {
-    this.isOnline = true;
+      this.isOnline = true;
     this.serverAvailable = true;
   };
 
   private handleOffline = () => {
-    this.isOnline = false;
-    this.serverAvailable = false;
+      this.isOnline = false;
+      this.serverAvailable = false;
   };
 
   public getStatus() {
@@ -31,18 +31,18 @@ class NetworkService {
       this.serverAvailable = this.isOnline;
     }
 
-    return {
-      isOnline: this.isOnline,
-      isServerAvailable: this.serverAvailable
-    };
+      return {
+          isOnline: this.isOnline,
+          isServerAvailable: this.serverAvailable
+      };
   }
 
   // Cleanup method to call when unmounting
   public destroy() {
-    if (typeof window !== 'undefined') {
-      window.removeEventListener('online', this.handleOnline);
-      window.removeEventListener('offline', this.handleOffline);
-    }
+      if (typeof window !== 'undefined') {
+          window.removeEventListener('online', this.handleOnline);
+          window.removeEventListener('offline', this.handleOffline);
+      }
   }
 }
 

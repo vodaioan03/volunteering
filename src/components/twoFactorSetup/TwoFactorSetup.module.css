@@ -1,0 +1,202 @@
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modalContent {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 90%;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.closeButton {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666;
+}
+
+.closeButton:hover {
+    color: #333;
+}
+
+.initialStep,
+.verifyStep {
+    text-align: center;
+}
+
+.initialStep h2,
+.verifyStep h2 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.initialStep p,
+.verifyStep p {
+    color: #666;
+    margin-bottom: 1.5rem;
+}
+
+.authenticatorInfo {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    text-align: left;
+}
+
+.authenticatorInfo h3 {
+    color: #334155;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.appOptions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.appLink {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    color: #334155;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.appLink:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.appLink svg {
+    font-size: 1.25rem;
+}
+
+.qrContainer {
+    display: flex;
+    justify-content: center;
+    margin: 2rem 0;
+}
+
+.qrWrapper {
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+}
+
+.manualEntry {
+    background: #f8fafc;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1.5rem 0;
+}
+
+.secretCode {
+    display: block;
+    background: #e2e8f0;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-family: monospace;
+    margin-top: 0.5rem;
+    word-break: break-all;
+}
+
+.verificationSection {
+    margin-top: 2rem;
+}
+
+.codeInput {
+    width: 200px;
+    padding: 0.75rem;
+    font-size: 1.5rem;
+    text-align: center;
+    letter-spacing: 0.5rem;
+    border: 2px solid #e5e5e5;
+    border-radius: 8px;
+    margin: 1rem 0;
+    font-family: monospace;
+}
+
+.codeInput:focus {
+    border-color: #3b82f6;
+    outline: none;
+}
+
+.setupButton,
+.verifyButton {
+    background: linear-gradient(45deg, #3b82f6, #6366f1);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    width: 100%;
+    max-width: 300px;
+    margin: 1rem auto;
+}
+
+.setupButton:hover,
+.verifyButton:hover {
+    transform: translateY(-2px);
+}
+
+.setupButton:disabled,
+.verifyButton:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+@media (max-width: 768px) {
+    .modalContent {
+        width: 95%;
+        padding: 1.5rem;
+    }
+
+    .appOptions {
+        gap: 0.75rem;
+    }
+
+    .appLink {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .qrWrapper {
+        padding: 0.75rem;
+    }
+
+    .codeInput {
+        width: 180px;
+        font-size: 1.25rem;
+    }
+} 

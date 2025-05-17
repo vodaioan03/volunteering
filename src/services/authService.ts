@@ -13,7 +13,7 @@ interface JwtPayload {
 }
 
 export const authService = {
-    login: async (data: LoginDto): Promise<void> => {
+    login: async (data: LoginDto): Promise<AuthResponse> => {
         const response = await fetch(`${API_URL}/api/auth/login`, {
             method: 'POST',
             headers: {
@@ -21,7 +21,7 @@ export const authService = {
                 'Accept': 'application/json'
             },
             body: JSON.stringify(data),
-            credentials: 'same-origin',
+            credentials: 'include',
             mode: 'cors'
         });
 
@@ -31,16 +31,52 @@ export const authService = {
         }
 
         const result: AuthResponse = await response.json();
-        localStorage.setItem('token', result.token);
+        console.log('Login response:', { 
+            ...result, 
+            token: result.token ? 'Token exists' : 'No token',
+            requires2FA: result.requires2FA,
+            hastemporaryToken: !!result.temporaryToken
+        });
         
-        // Decode token to get user info
-        const decoded = jwtDecode<JwtPayload>(result.token);
-        const user: User = {
-            email: decoded.email,
-            firstName: decoded.firstName,
-            lastName: decoded.lastName
-        };
-        localStorage.setItem('user', JSON.stringify(user));
+        // Only store token and user info if 2FA is not required
+        if (!result.requires2FA) {
+            if (!result.token) {
+                throw new Error('No token received from server');
+            }
+            localStorage.setItem('token', result.token);
+            console.log('Token stored in localStorage');
+            
+            try {
+                // Decode token to get user info
+                const decoded = jwtDecode<JwtPayload>(result.token);
+                console.log('Decoded token payload:', { ...decoded, sub: '[REDACTED]' });
+                
+                const user: User = {
+                    email: decoded.email,
+                    firstName: decoded.firstName,
+                    lastName: decoded.lastName
+                };
+                localStorage.setItem('user', JSON.stringify(user));
+                console.log('User info stored in localStorage');
+            } catch (error) {
+                console.error('Error decoding token:', error);
+                // Even if token decoding fails, try to get user info from the response
+                if (result.user) {
+                    localStorage.setItem('user', JSON.stringify(result.user));
+                    console.log('User info stored from response');
+                }
+            }
+        } else {
+            if (!result.temporaryToken) {
+                throw new Error('No temporary token received for 2FA');
+            }
+            console.log('2FA is required, not storing permanent token yet');
+            // Make sure we don't have any old tokens when 2FA is required
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+        }
+
+        return result;
     },
 
     register: async (data: RegisterDto): Promise<void> => {
@@ -51,7 +87,7 @@ export const authService = {
                 'Accept': 'application/json'
             },
             body: JSON.stringify(data),
-            credentials: 'same-origin',
+            credentials: 'include',
             mode: 'cors'
         });
 
@@ -75,44 +111,13 @@ export const authService = {
     getCurrentUser: (): User | null => {
         if (typeof window === 'undefined') return null;
         
-        const token = localStorage.getItem('token');
-        if (!token) return null;
+        const userStr = localStorage.getItem('user');
+        if (!userStr) return null;
 
         try {
-            // First try to get from localStorage
-            const userData = localStorage.getItem('user');
-            if (userData && userData !== 'undefined' && userData !== 'null') {
-                try {
-                    const parsedUser = JSON.parse(userData);
-                    // Validate the parsed user object has required fields
-                    if (parsedUser && 
-                        typeof parsedUser === 'object' && 
-                        'email' in parsedUser && 
-                        'firstName' in parsedUser && 
-                        'lastName' in parsedUser) {
-                        return parsedUser;
-                    }
-                } catch (parseError) {
-                    console.error('Error parsing user data:', parseError);
-                    // Continue to token decoding as fallback
-                }
-            }
-
-            // If not in localStorage or invalid, try to decode from token
-            const decoded = jwtDecode<JwtPayload>(token);
-            const user: User = {
-                email: decoded.email,
-                firstName: decoded.firstName,
-                lastName: decoded.lastName
-            };
-            // Update localStorage with valid user data
-            localStorage.setItem('user', JSON.stringify(user));
-            return user;
-        } catch (error) {
-            console.error('Error getting current user:', error);
-            // Clear potentially corrupted data
-            localStorage.removeItem('user');
-            return null;
+            return JSON.parse(userStr);
+        } catch {
+      return null;
         }
     },
     
@@ -154,4 +159,4 @@ export const authService = {
             return false;
         }
     }
-};
+  };

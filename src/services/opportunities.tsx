@@ -4,7 +4,7 @@ import { networkService } from "../services/network";
 import { offlineQueue } from "./offlineQueue";
 import { authService } from "./authService";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api/opportunities';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 const LOCAL_STORAGE_KEY = 'offline_opportunities_data';
 
 class OpportunityService {
@@ -46,7 +46,7 @@ class OpportunityService {
         options.body = JSON.stringify(body);
       }
 
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+      const response = await fetch(`${API_BASE_URL}/api/opportunities${endpoint}`, options);
       
       if (response.status === 429) {
         // Handle rate limiting - wait and retry
@@ -272,7 +272,7 @@ public getCachedPage(page: number): Opportunity[] {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 3000); // 3s timeout
         
-        const response = await fetch(`${API_BASE_URL}/health`, {
+        const response = await fetch(`${API_BASE_URL}/api/opportunities/health`, {
           method: 'HEAD',
           cache: 'no-store',
           signal: controller.signal
@@ -475,7 +475,7 @@ public getCachedPage(page: number): Opportunity[] {
   // Attachment methods with simplified offline handling
   public async getAttachments(opportunityId: string) {
     try {
-      const response = await fetch(`${API_BASE_URL}/${opportunityId}/attachments`);
+      const response = await fetch(`${API_BASE_URL}/api/opportunities/${opportunityId}/attachments`);
       if (!response.ok) throw new Error('OFFLINE_MODE');
       return await response.json();
     } catch (error) {
@@ -488,7 +488,7 @@ public getCachedPage(page: number): Opportunity[] {
 
   public async uploadAttachment(opportunityId: string, formData: FormData) {
     try {
-      const response = await fetch(`${API_BASE_URL}/${opportunityId}/attachments`, {
+      const response = await fetch(`${API_BASE_URL}/api/opportunities/${opportunityId}/attachments`, {
         method: 'POST',
         body: formData,
       });
@@ -505,7 +505,7 @@ public getCachedPage(page: number): Opportunity[] {
 
   public async downloadAttachment(opportunityId: string, fileId: string) {
     try {
-      const response = await fetch(`${API_BASE_URL}/${opportunityId}/attachments/${fileId}`);
+      const response = await fetch(`${API_BASE_URL}/api/opportunities/${opportunityId}/attachments/${fileId}`);
       if (!response.ok) throw new Error('OFFLINE_MODE');
       
       const contentDisposition = response.headers.get('Content-Disposition');

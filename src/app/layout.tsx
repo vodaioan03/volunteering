@@ -50,12 +50,12 @@ export default function RootLayout({
       >
         <ErrorProvider>
           <AuthProvider>
-            <Header />
-            <OpportunitiesProvider>
-              {children}
-            </OpportunitiesProvider>
+        <Header />
+          <OpportunitiesProvider>
+            {children}
+          </OpportunitiesProvider>
             <Footer />
-          </AuthProvider>
+        </AuthProvider>
         </ErrorProvider>
       </body>
     </html>

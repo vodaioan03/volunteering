@@ -2,164 +2,209 @@
   max-width: 800px;
   margin: 2rem auto;
   padding: 2rem;
-  background: white;
-  border-radius: 1rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.header h1 {
+.title {
   font-size: 2rem;
   font-weight: 600;
   color: #111827;
+  margin-bottom: 2rem;
+  text-align: center;
 }
 
-.editButton, .saveButton, .cancelButton {
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
+.profileSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
+
+.field label {
+  min-width: 120px;
   font-weight: 500;
+  color: #4b5563;
+}
+
+.input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.editButton,
+.saveButton,
+.cancelButton {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  cursor: pointer;
   transition: all 0.2s;
 }
 
 .editButton {
-  background-color: #4F46E5;
+  background-color: #3b82f6;
   color: white;
-  border: none;
 }
 
 .editButton:hover {
-  background-color: #4338CA;
-}
-
-.editActions {
-  display: flex;
-  gap: 1rem;
+  background-color: #2563eb;
 }
 
 .saveButton {
-  background-color: #059669;
+  background-color: #10b981;
   color: white;
-  border: none;
 }
 
 .saveButton:hover {
-  background-color: #047857;
+  background-color: #059669;
 }
 
 .cancelButton {
-  background-color: #EF4444;
+  background-color: #ef4444;
   color: white;
-  border: none;
 }
 
 .cancelButton:hover {
-  background-color: #DC2626;
-}
-
-.content {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-.section {
-  padding: 1.5rem;
-  background: #F9FAFB;
-  border-radius: 0.5rem;
-}
-
-.section h2 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 1rem;
-}
-
-.field {
-  margin-bottom: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.field label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #6B7280;
-}
-
-.field span {
-  font-size: 1rem;
-  color: #111827;
-}
-
-.field input, .field textarea {
-  padding: 0.5rem;
-  border: 1px solid #D1D5DB;
-  border-radius: 0.375rem;
-  font-size: 1rem;
-  width: 100%;
-  transition: border-color 0.2s;
-}
-
-.field input:focus, .field textarea:focus {
-  outline: none;
-  border-color: #4F46E5;
-  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
-}
-
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-}
-
-.stat {
-  padding: 1rem;
-  background: white;
-  border-radius: 0.5rem;
-  text-align: center;
-}
-
-.stat label {
-  display: block;
-  font-size: 0.875rem;
-  color: #6B7280;
-  margin-bottom: 0.5rem;
-}
-
-.stat span {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #4F46E5;
+  background-color: #dc2626;
 }
 
 .loading {
   text-align: center;
   padding: 2rem;
-  font-size: 1.125rem;
-  color: #6B7280;
+  color: #6b7280;
 }
 
 .error {
   text-align: center;
   padding: 2rem;
-  color: #DC2626;
-  background: #FEE2E2;
-  border-radius: 0.5rem;
-  margin: 2rem auto;
-  max-width: 800px;
+  color: #ef4444;
+}
+
+.securitySection {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.securitySection h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 1rem;
+}
+
+.twoFactorStatus {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: white;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.securityIcon {
+  color: #64748b;
+  font-size: 1.25rem;
+}
+
+.enabled {
+  color: #10b981;
+  font-weight: 500;
+}
+
+.disabled {
+  color: #ef4444;
+  font-weight: 500;
+}
+
+.enableButton {
+  margin-left: auto;
+  padding: 0.5rem 1rem;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.enableButton:hover {
+  background-color: #2563eb;
+}
+
+@media (max-width: 640px) {
+  .container {
+    margin: 1rem;
+    padding: 1rem;
+  }
+
+  .field {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .field label {
+    min-width: auto;
+  }
+
+  .input {
+    width: 100%;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .editButton,
+  .saveButton,
+  .cancelButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .twoFactorStatus {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .enableButton {
+    margin: 1rem 0 0;
+    width: 100%;
+  }
 }

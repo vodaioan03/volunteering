@@ -7,19 +7,31 @@ export interface UserProfile {
     email: string;
     firstName: string;
     lastName: string;
-    phoneNumber: string;
-    birthDate: string;
-    gender: 'MALE' | 'FEMALE' | 'OTHER';
-    address: string;
-    city: string;
-    state: string;
-    country: string;
-    zipCode: string;
+    phoneNumber?: string;
+    birthDate?: string;
+    gender?: 'MALE' | 'FEMALE' | 'OTHER';
+    address?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    zipCode?: string;
     role: 'USER' | 'ADMIN' | 'ORGANIZER';
     isMonitored: boolean;
+    has2FAEnabled: boolean;
 }
 
-export interface ProfileUpdateDto extends Partial<Omit<UserProfile, 'id' | 'email' | 'role' | 'isMonitored'>> {}
+export interface ProfileUpdateDto {
+    firstName: string;
+    lastName: string;
+    phoneNumber?: string;
+    birthDate?: string;
+    gender?: 'MALE' | 'FEMALE' | 'OTHER';
+    address?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    zipCode?: string;
+}
 
 class ProfileService {
     private static instance: ProfileService;
@@ -48,7 +60,7 @@ class ProfileService {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                credentials: 'same-origin',
+                credentials: 'include',
                 mode: 'cors'
             };
 
@@ -79,8 +91,10 @@ class ProfileService {
     public async getProfile(): Promise<UserProfile> {
         const { isOnline, isServerAvailable } = networkService.getStatus();
         const token = localStorage.getItem('token');
-        console.log(token)
+        console.log('Getting profile with token:', token ? 'Token exists' : 'No token');
+        
         if (!isOnline || !isServerAvailable) {
+            console.log('Offline mode - using cached profile');
             const cachedProfile = this.getCachedProfile();
             if (!cachedProfile) {
                 throw new Error('No cached profile data available');
@@ -89,12 +103,25 @@ class ProfileService {
         }
 
         try {
-            const profile = await this.makeRequest<UserProfile>('/profile');
+            console.log('Making profile request...');
+            const profile = await this.makeRequest<UserProfile>('/profile?t=' + new Date().getTime());
+            console.log('Profile response:', { 
+                ...profile, 
+                has2FAEnabled: profile.has2FAEnabled,
+                token: token ? 'Token exists' : 'No token'
+            });
+            
+            if (profile.has2FAEnabled === undefined) {
+                console.warn('Profile response missing has2FAEnabled field');
+            }
+            
             this.cacheProfile(profile);
             return profile;
         } catch (error) {
+            console.error('Profile request error:', error);
             const cachedProfile = this.getCachedProfile();
             if (cachedProfile) {
+                console.log('Using cached profile due to error');
                 return cachedProfile;
             }
             if (error instanceof Error) {
